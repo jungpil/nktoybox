@@ -89,30 +89,6 @@ class AgentClan:
         return self.iteration_plan[self.my_current_iteration_num][:]
     def has_next_agent(self):
         return self.my_num < self.total_num
-
-class Role:
-    """
-    # Role is a plug-in object for an agent.
-    """
-    def __init__(self,**plug_ins):
-        self.define_plugin_behavior(plug_ins)
-    def define_plugin_behavior(self,plug_ins):
-        pass
-        #List up plugin function here
-        #if plug_ins.has_key('func_can_partner_with'): self.can_partner_with = plug_ins['func_can_partner_with'] #plug-in function
-        #if plug_ins.has_key('func_getLocIdWithOtherLocId'): self.getLocIdWithOtherLocId = plug_ins['func_getLocIdWithOtherLocId']
-'''
-How to define plug-in behavior?
-It is easy.
-Create a class that inherits Role
-class InnovatorRole(Role):
-  def __init__(self,**plug_ins):
-    Role.__init__(self,**plug_ins)
-  def define_plugin_behavior(self,plug_ins):
-    if plug_ins.has_key('func_can_partner_with'): self.can_partner_with = plug_ins['func_can_partner_with'] #plug-in function
-
->>> mb = InnovatorRole(func_can_partner_with = can_partner_with)
-'''
 class Agent:
     '''
     Abstract class for agent
@@ -122,6 +98,7 @@ class Agent:
         self.my_performance = 0.0 #this is default value of getting fitness value
         self.my_clan = my_clan #landscape
         self.my_status = -1
+        self.plans = [] #should be implemented
         #TODO - check assertions
     def compute_average_performance_fitness_around_me(self,whosethere):
         '''
