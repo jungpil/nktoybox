@@ -177,10 +177,15 @@ contribution value when "the 1st element" is "0" given
         result = "%s%s\n" % (str_info,str_table,)
         return result
 class Landscape:
-    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None):
+    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None,uncertainty=0):
         self.has_standard = False
         self.influence_matrix = influence_matrix
         self.locations_list = []
+        self.fitness_value = NP.array([])
+        self.standardized_fitness_value = NP.array([])
+        self.noised_fitness_value = NP.array([]) #TODO
+        self.uncertainty = uncertainty #TODO
+        
         if influence_matrix != None and fitness_contribution_matrix == None:
             self.influence_matrix = influence_matrix
             self.fitness_contribution_table = FitnessContributionTable(self.influence_matrix) # KEY!
@@ -205,6 +210,9 @@ the performance value, then return.
             return self.standardized_fitness_value[location_id]
         else:
             return self.fitness_value[location_id]
+    def get_noised_score_of_location_by_id(self,location_id): # KEY!
+        assert len(self.noised_fitness_value) > 0, "Errror. No noised fitness values are defined."
+        return self.noised_fitness_value[location_id]
     def compute_all_locations_id(self,do_standardize = True):
         map_size = 1 << self.get_influence_matrix_N()
         self.locations_list = []
@@ -224,34 +232,19 @@ the performance value, then return.
         if do_standardize:
             self.standardize()
             self.has_standard = True
-#     def compute_all_locations_id_cython(self,do_standardize = True):
-#         import cython_nk
-#         map_size = 1 << self.get_influence_matrix_N()
-#         self.locations_list = []
-#         add_locs = self.locations_list.append
-#         for i in xrange(map_size):
-#             add_locs(self.location_id_to_location(i))
-#         N = self.get_influence_matrix_N()
-#         K = self.get_influence_matrix_K()
-#         my_dependence_matrix = self.influence_matrix.my_dependence_matrix
-#         my_dependence_matrix.dtype = NP.int
-#         contribution_table = self.fitness_contribution_table.my_table
-#         contribution_table.dtype = NP.float
-#         self.fitness_value = NP.zeros(map_size,dtype=NP.float)
-#         '''
-#         '''
-#         func = cython_nk.compute_score_for_location_id
-# #         self.fitness_value = cython_nk.test(N,K,my_dependence_matrix,contribution_table,self.locations_list,map_size)
-#         for location_id in xrange(map_size):
-#             locations = self.locations_list[location_id]
-#             locations.dtype = NP.int
-#             self.fitness_value[location_id] = func(N,K,locations,my_dependence_matrix,contribution_table)
-#         self.fitness_max = NP.max(self.fitness_value)
-#         self.fitness_min = NP.min(self.fitness_value)
-#         self.fitness_mean = NP.mean(self.fitness_value)
-#         if do_standardize:
-#             self.standardize()
-#             self.has_standard = True
+        #update noise
+        if self.uncertainty > 0:
+            random_size = self.fitness_value.size
+            noise_random = NP.random.uniform(-1 * self.uncertainty, self.uncertainty,random_size) #0~0.999999
+            if self.has_standard:
+                self.noised_fitness_value = self.standardized_fitness_value + noise_random
+            else:
+                self.noised_fitness_value = self.fitness_value + noise_random
+        else:
+            if self.has_standard:
+                self.noised_fitness_value = self.standardized_fitness_value
+            else:
+                self.noised_fitness_value = self.fitness_value
     def compute_score_for_location_id(self,location_id,plugin_function = None):
         """
 Compute and return the fitness value of the given location id.

@@ -40,6 +40,7 @@ class AdapterPlan:
         self.simulator.write_record(agent.my_performance,ct)
         while 1:
             for plan in agent.plans:
+                agent.ct = ct
                 (agent.my_id, agent.my_performance) = current_behavior.execute(agent, plan)
                 ct += 1
                 self.simulator.write_record(agent.my_performance,ct)

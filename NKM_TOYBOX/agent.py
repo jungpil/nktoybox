@@ -46,6 +46,7 @@ class AgentClan:
         for _ in xrange(self.total_num):
             member_loc_id = random.randint(0,upper_limit)
             agent = self.agent_class(member_loc_id,self)
+            agent.visited_ids[member_loc_id] = 'v' #visit
             add_member(agent)
         self.number_of_not_finished = self.total_num
     def refresh_clan(self):
@@ -99,6 +100,8 @@ class Agent:
         self.my_clan = my_clan #landscape
         self.my_status = -1
         self.plans = [] #should be implemented
+        self.visited_ids = {}
+        self.ct = 0 #current tick
         #TODO - check assertions
     def compute_average_performance_fitness_around_me(self,whosethere):
         '''
