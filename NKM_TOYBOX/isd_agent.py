@@ -7,7 +7,9 @@ Information Systems @NUS
 isd_agent.py
 '''
 from agent import Agent, AgentClan
-from copy
+from collections import deque
+import random
+import copy
 
 class AgileDeveloper(Agent):
     def __init__(self, my_id, my_clan):
@@ -45,7 +47,7 @@ class WaterfallDeveloperClan(AgentClan):
     def __init__(self,landscape, processing_power, agent_class, population=1, feedback_tick = 5):
         AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
         self.plans = None
-        self.feedback_tick = self.feedback_tick # get feedback on every fifth tick
+        self.feedback_tick = feedback_tick # get feedback on every fifth tick
     def set_iteration_plan(self,iteration_plan):
         self.plans = copy.deepcopy(iteration_plan) #deep copy!
     def hatch_members(self):

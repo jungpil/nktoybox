@@ -14,7 +14,7 @@ class AdapterPlanISD:
         ct = 0
         # initialization
         agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
-        agent.expected_performance = true_performance
+        agent.expected_performance = agent.true_performance
         self.simulator.write_record(agent.true_performance,ct)
         # searching
         while 1:
