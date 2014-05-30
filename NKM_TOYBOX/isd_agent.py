@@ -1,10 +1,12 @@
 '''
-NK Modeling - Modularity + ISD Style
-Jungpil Hahn and Taekyung Kim
-2014
-Information Systems @NUS
-
 isd_agent.py
+
+NK Landscape Model
+Modularity x ISD
+
+Jungpil and Taekyung
+
+2014
 '''
 from agent import Agent, AgentClan
 from collections import deque
@@ -16,12 +18,14 @@ class AgileDeveloper(Agent):
         Agent.__init__(self,my_id=my_id,my_clan=my_clan)
         self.true_performance = 0
         self.expected_performance = 0
+        self.wanna_be_my_id = -1
         self.plans = [[]]
 class WaterfallDeveloper(Agent):
     def __init__(self, my_id, my_clan):
         Agent.__init__(self,my_id=my_id,my_clan=my_clan)
         self.true_performance = 0
         self.expected_performance = 0
+        self.wanna_be_my_id = -1
         self.plans = [[]]
         self.feedback_tick = 5
 class AgileDeveloperClan(AgentClan):
