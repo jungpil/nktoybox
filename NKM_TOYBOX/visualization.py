@@ -1,10 +1,12 @@
 '''
-Created on 2014. 3. 24.
+agent.py
 
->>> idx_matrix = make_adjacent_idx_matrix(4)
->>> idx_matrix = make_adjacent_idx_matrix(6)
->>> idx_matrix = make_adjacent_idx_matrix(8)
-@author: drtagkim
+NK Landscape Model
+Modularity x ISD
+
+Jungpil and Taekyung
+
+2014
 '''
 import numpy as np
 
@@ -75,3 +77,4 @@ def test(file_name,N):
     ax = fig.gca(projection='3d')
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1)
     plt.show()
+# END OF PROGRAM #

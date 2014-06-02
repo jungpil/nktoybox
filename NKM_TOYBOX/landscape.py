@@ -1,8 +1,12 @@
 '''
-File: landscape.py
-Author(s): Jungpil Hahn and Taekyung Kim
-National University of Singapore
-Information Systems
+landscape.py
+
+NK Landscape Model
+Modularity x ISD
+
+Jungpil and Taekyung
+
+2014
 '''
 import numpy as NP #Numpy
 import RandomGenerator
@@ -177,15 +181,11 @@ contribution value when "the 1st element" is "0" given
         result = "%s%s\n" % (str_info,str_table,)
         return result
 class Landscape:
-    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None,uncertainty=0):
-        self.has_standard = False
+    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None):
         self.influence_matrix = influence_matrix
         self.locations_list = []
         self.fitness_value = NP.array([])
-        self.standardized_fitness_value = NP.array([])
-        self.noised_fitness_value = NP.array([]) #TODO
-        self.uncertainty = uncertainty #TODO
-        
+        self.standardized_fitness_value = None
         if influence_matrix != None and fitness_contribution_matrix == None:
             self.influence_matrix = influence_matrix
             self.fitness_contribution_table = FitnessContributionTable(self.influence_matrix) # KEY!
@@ -202,18 +202,15 @@ Return the fitness value of the given location id. If the performance
 value was cached, return the cached value. Otherwise, compute and cache
 the performance value, then return.
         """
-        '''
-        Depreciated
-        use fitness_value <~ numpy ndarray
-        '''
-        if self.has_standard:
-            return self.standardized_fitness_value[location_id]
-        else:
-            return self.fitness_value[location_id]
-    def get_noised_score_of_location_by_id(self,location_id): # KEY!
-        assert len(self.noised_fitness_value) > 0, "Errror. No noised fitness values are defined."
-        return self.noised_fitness_value[location_id]
-    def compute_all_locations_id(self,do_standardize = True):
+        return self.fitness_value[location_id]
+    def get_noised_score_of_location_by_id(self,location_id, func=None, **kargs): # KEY!
+        c_i = self.fitness_value[location_id]
+        e_i = func(c_i=c_i, **kargs)
+        return e_i
+    def compute_all_locations_id(self, fix_plan=None):
+        """
+|  Brutely compute all before we do something
+        """
         map_size = 1 << self.get_influence_matrix_N()
         self.locations_list = []
         add_locs = self.locations_list.append
@@ -222,37 +219,30 @@ the performance value, then return.
         '''
         Calculate all fitness_value
         '''
-        self.fitness_value = NP.array(map(self.compute_score_for_location_id,xrange(map_size)))
+        if fix_plan == None:
+            self.fitness_value = NP.array(map(self.compute_score_for_location_id,xrange(map_size)))
+        else:
+            result_temp = []
+            result_temp_add = result_temp.append
+            for l_id in xrange(map_size):
+                result_temp_add(self.compute_score_for_location_id(l_id,fix_plan = fix_plan))
+            self.fitness_value = NP.array(result_temp)
         '''
         Statistics
         '''
-        self.fitness_max = NP.max(self.fitness_value)
-        self.fitness_min = NP.min(self.fitness_value)
-        self.fitness_mean = NP.mean(self.fitness_value)
-        if do_standardize:
-            self.standardize()
-            self.has_standard = True
-        #update noise
-        if self.uncertainty > 0:
-            random_size = self.fitness_value.size
-            noise_random = NP.random.uniform(-1 * self.uncertainty, self.uncertainty,random_size) #0~0.999999
-            if self.has_standard:
-                self.noised_fitness_value = self.standardized_fitness_value + noise_random
-            else:
-                self.noised_fitness_value = self.fitness_value + noise_random
-        else:
-            if self.has_standard:
-                self.noised_fitness_value = self.standardized_fitness_value
-            else:
-                self.noised_fitness_value = self.fitness_value
-    def compute_score_for_location_id(self,location_id,plugin_function = None):
+    def compute_score_for_location_id(self,location_id,fix_plan=None):
         """
-Compute and return the fitness value of the given location id.
+|  Compute and return the fitness value of the given location id.
+|  fix_plan indicates cognitive representation for low dimensionality (see Gavetti 2000)
         """
         assert len(self.locations_list) > 0, "You should specify location ids first."
         locations = self.locations_list[location_id] # first, we need location, ndarray(int)
         result = 0.0 #float
-        for i in xrange(self.get_influence_matrix_N()):
+        if fix_plan == None:
+            coverage = xrange(self.get_influence_matrix_N())
+        else:
+            coverage = fix_plan
+        for i in coverage:
             idx1 = i # in sequence
             idx2 = locations[i] # case determined by location id
             idx3 = 0
@@ -267,10 +257,7 @@ Compute and return the fitness value of the given location id.
                 y = a ** b[::-1] #inverse
                 idx3 = NP.dot(x,y) # step by 2, (0,1), (0,1,2,3), (0,1,2,3,4,5,6,7), (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15) <- spanning vector space (for e.g.)
                 #idx3_n = 2^n*a_0 + 2^(n-1)*a_1 +...+2^1*a_(n-1)+a_n
-            if plugin_function == None:
-                result += self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
-            else:
-                result += plugin_function(self.fitness_contribution_table.get_value_of(idx1, idx2, idx3))
+            result += self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
         rv = float(result) / (float(self.get_influence_matrix_N())) # average value without weight
         return rv
     def location_id_to_location(self,location_id):
@@ -366,11 +353,57 @@ given processing power.
             locations[i] = location_masks[i]
         return self.location_to_location_id(list(locations))
     def standardize(self):
-        '''
-        precondition: compute_all_locations_id()
-        '''
+        assert len(self.fitness_value) > 0, "No fitness values are assigned."
+        self.fitness_max = NP.max(self.fitness_value)
+        self.fitness_min = NP.min(self.fitness_value)
+        self.fitness_mean = NP.mean(self.fitness_value)
         self.standardized_fitness_value = self.fitness_value / self.fitness_max
+    def get_standardized_value(self,fitness_value):
+        if self.standardized_fitness_value == None:
+            self.standardize()
+        return fitness_value / float(self.fitness_max)
 # =====================================
+class LandscapeAdaptive(Landscape):
+    def __init__(self,influence_matrix = None,fitness_contribution_matrix = None):
+        Landscape.__init__(self,influence_matrix=influence_matrix,fitness_contribution_matrix=fitness_contribution_matrix)
+        self.fitness_value_dict = {} # main data set
+        self.fix_plan = None
+        self.standardized_fitness_value_dict = None
+    def compute_all_locations_id(self, fix_plan=None):
+        """
+|  Brutely compute all before we do something
+        """
+        map_size = 1 << self.get_influence_matrix_N()
+        self.locations_list = []
+        add_locs = self.locations_list.append
+        for i in xrange(map_size):
+            add_locs(self.location_id_to_location(i))
+    def get_score_of_location_by_id(self,location_id): # KEY!
+        try:
+            return self.fitness_value_dict[location_id]
+        except KeyError:
+            self.fitness_value_dict[location_id] = self.compute_score_for_location_id(location_id,self.fix_plan)
+            return self.fitness_value_dict[location_id]
+    def get_noised_score_of_location_by_id(self,location_id, func = None, **kargs): # KEY!
+        try:
+            c_i = self.fitness_value_dict[location_id]
+        except:
+            self.fitness_value_dict[location_id] = self.compute_score_for_location_id(location_id,self.fix_plan)
+            c_i = self.fitness_value_dict[location_id]
+        e_i = func(c_i=c_i, **kargs)
+        return e_i
+    def standardize(self):
+        assert len(self.fitness_value_dict) > 0, "No fitness values are assigned."
+        fitness_value = NP.array(self.fitness_value_dict.values())
+        self.fitness_max = NP.max(fitness_value)
+        self.fitness_min = NP.min(fitness_value)
+        self.fitness_mean = NP.mean(fitness_value)
+        standardized_fitness = fitness_value / self.fitness_max
+        self.standardized_fitness_value_dict = dict(zip(self.fitness_value_dict.keys(),standardized_fitness))
+    def get_standardized_value(self,fitness_value):
+        if self.standardized_fitness_value_dict == None:
+            self.standardize()
+        return fitness_value / float(self.fitness_max)
 '''
 Utilities
 '''
@@ -452,3 +485,4 @@ def load_landscapes(file_name):
     f = open(file_name)
     obj = cPickle.load(f)
     return obj
+# END OF PROGRAM #

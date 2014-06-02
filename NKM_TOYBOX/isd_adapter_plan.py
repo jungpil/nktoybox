@@ -10,29 +10,41 @@ Jungpil and Taekyung
 '''
 
 import numpy as np
-
-class AdapterPlanISD:
+from isd_algorithm import linear_uncertainty
+from simulator import AdapterPlan
+class AdapterPlanISD(AdapterPlan):
     """
 |  ISD Simulation plan
 |  Parameters: simulator object, behavior class, agent clan, focused agent, target time run
     """
     def __init__(self, simulator, adapter_behavior, agent_clan, agent, tick_end):
+        AdapterPlan.__init__(self,simulator=simulator, adapter_behavior=adapter_behavior, agent_clan=agent_clan, agent=agent, tick_end=tick_end)
         self.simulator = simulator
         self.adapter_behavior = adapter_behavior
         self.agent_clan = agent_clan
         self.agent = agent
         self.tick_end = tick_end
+        self.uncertainty_base = self.simulator.uncertainty_base
+    def my_profile(cls):
+        return "\nPlan for ISD Development Simulation\n"
+    profile = classmethod(my_profile)
     def run(self):
         """
 |  Run a simulator
 |  This contains a core algorithm for managing the entire simulation
         """
         agent = self.agent #assing to local reference
+        agent.tick_end = self.tick_end
         current_behavior = self.adapter_behavior(self.agent_clan,agent) #define a behavior adapter
         break_marker = False #stop marker
         ct = 0 #current time
         #### INITIALIZATION ####
-        agent.expected_performance = self.agent_clan.landscape.get_noised_score_of_location_by_id(agent.my_id)
+        agent.expected_performance = self.agent_clan.landscape.get_noised_score_of_location_by_id(
+                                                                                                                                    agent.my_id, 
+                                                                                                                                    func = linear_uncertainty, 
+                                                                                                                                    uncertainty_base = self.uncertainty_base,
+                                                                                                                                    tick = ct,
+                                                                                                                                    total_tick = agent.tick_end)
         # expected performance := true fitness value +- error (i.e., uncertainty ~ uniform(given range))
         # When a project starts, nobody knows feedback from customers. The team may rely on market research data.
         agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
@@ -47,6 +59,8 @@ class AdapterPlanISD:
         #### SEARCHING ####
         while 1:
             for plan in agent.plans: #per each plan
+                #TODO - adjust as N size varies
+                self.agent_clan.landscape.compute_all_locations_id(do_standardize = True, fix_plan = plan)
                 agent.ct = ct # let him know the current tick(=time)
                 (agent.my_id, agent.true_performance) = current_behavior.execute(agent, plan) #update
                 # Let the agent work a planned task at a given time (linearly or cyclically)

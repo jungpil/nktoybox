@@ -1,3 +1,13 @@
+'''
+agent.py
+
+NK Landscape Model
+Modularity x ISD
+
+Jungpil and Taekyung
+
+2014
+'''
 import numpy as np
 from simulator import AdapterBehavior
 
@@ -42,3 +52,4 @@ class AdapterBehaviorAdaptive(AdapterBehavior):
                 agent.visited_ids[new_id]='v'
                 break
         return (new_id,new_performance)
+# END OF PROGRAM #

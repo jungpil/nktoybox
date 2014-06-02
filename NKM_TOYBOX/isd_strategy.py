@@ -11,6 +11,7 @@ Jungpil and Taekyung
 
 import numpy as np
 from simulator import AdapterBehavior
+from isd_algorithm import linear_uncertainty
 
 class AdapterBehaviorAgileTeam(AdapterBehavior):
     """
@@ -31,7 +32,11 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
             neighbors_np = np.array(list(neighbors),dtype=np.int)
             np.random.shuffle(neighbors_np) #randomly select configuration (by luck)
             for neighbor_id in np.nditer(neighbors_np):
-                new_score = self.agent_clan.landscape.get_noised_score_of_location_by_id(int(neighbor_id))
+                new_score = self.agent_clan.landscape.get_noised_score_of_location_by_id(
+                                    int(neighbor_id), 
+                                    func = linear_uncertainty, 
+                                    tick = agent.ct,
+                                    total_tick = agent.tick_end)
                 if current_score < new_score and not agent.visited_ids.has_key(int(neighbor_id)):
                     new_id = int(neighbor_id)
                     # feedback from customers
@@ -43,6 +48,9 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
         new_id = agent.my_id
         new_performance = agent.true_performance
         return (new_id,new_performance)
+    def my_profile(cls):
+        rv = "----------------------------\n%s----------------------------\n" % ("Agile Development Team")
+    profile = classmethod(my_profile)
 class AdapterBehaviorWaterfallTeam(AdapterBehavior):
     """
 |  Behavior of developers who adopt the waterfall methodology
@@ -57,7 +65,15 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
             # requirement collection
             current_score = agent.expected_performance # the agent exactly know the evaluation from the market at the requirement stage
             neighbors = set(self.agent_clan.landscape.who_are_neighbors(agent.my_id,plan,self.agent_clan.myProcessingPower,False)) #except me
-            new_scores = map(self.agent_clan.landscape.get_noised_score_of_location_by_id,neighbors) #noised score
+            new_scores = []
+            new_scores_append = new_scores.append
+            for neighbor_id in neighbors:
+                lv = self.agent_clan.landscape.get_noised_score_of_location_by_id(
+                                                                                                        int(neighbor_id), 
+                                                                                                        func = linear_uncertainty, 
+                                                                                                        tick = agent.ct,
+                                                                                                        total_tick = agent.tick_end) 
+                new_scores_append(lv)
             np_scores = np.array(new_scores)
             if len(np_scores) > 0:
                 max_v = np_scores.max()
@@ -71,4 +87,7 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
         new_id = agent.my_id
         new_performance = agent.true_performance
         return (new_id,new_performance)
-        
+    def my_profile(cls):
+        rv = "----------------------------\n%s----------------------------\n" % ("Waterfall Development Team")
+    profile = classmethod(my_profile)
+# END OF PROGRAM #

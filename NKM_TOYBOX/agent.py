@@ -1,7 +1,12 @@
 '''
-Created on 2014. 3. 1.
+agent.py
 
-@author: drtagkim
+NK Landscape Model
+Modularity x ISD
+
+Jungpil and Taekyung
+
+2014
 '''
 import RandomGenerator
 import numpy as NP
@@ -35,6 +40,7 @@ class AgentClan:
         self.number_of_not_finished = -1 #finished work
         self.member_identification_record = []
         self.agent_class = agent_class
+        self.iteration_plan = None
     def hatch_members(self):
         '''
         >>> my_tribe.hatch_members(MyAgent) # MyAgent is a class
@@ -90,6 +96,12 @@ class AgentClan:
         return self.iteration_plan[self.my_current_iteration_num][:]
     def has_next_agent(self):
         return self.my_num < self.total_num
+    def __str__(self):
+        rv = "Plan: %s\nProcessing Power: %d\nN: %d\nK: %d\n" % (self.iteration_plan,
+                                                                                            self.myProcessingPower,
+                                                                                            self.landscape.get_influence_matrix_N(),
+                                                                                            self.landscape.get_influence_matrix_K())
+        return rv
 class Agent:
     '''
     Abstract class for agent
@@ -102,6 +114,7 @@ class Agent:
         self.plans = [] #should be implemented
         self.visited_ids = {}
         self.ct = 0 #current tick
+        self.tick_end = -1
         #TODO - check assertions
     def compute_average_performance_fitness_around_me(self,whosethere):
         '''
@@ -141,3 +154,4 @@ def generate_random_plan(N, how_many):
     possible_men = xrange(N)
     random.shuffle(possible_men)
     return possible_men[:how_many]
+# END OF PROGRAM #
