@@ -16,9 +16,9 @@ class SimRecord:
         self.plan = self.str_plan(plan)
         self.ct = ct
         self.performance = performance
-    def str_plan(plan_as_list):
-        str = "-".join(map(str,plan_as_list))
-        return str
+    def str_plan(self,plan_as_list):
+        rv = "-".join(map(str,plan_as_list))
+        return rv
 class Simulator:
     def __init__(self,agent_clan):
         self.agent_clan = agent_clan
@@ -33,9 +33,13 @@ class Simulator:
             my_plan = adapter_plan(self, adapter_behavior, agent_clan, agent, tick_end)
             my_plan.run()
     def write_record(self,agent):
-        sr = SimRecord(agent.my_id,agent.plan,agent.ct,agent.performance)
+        sr = SimRecord(agent.my_id,agent.plans,agent.ct,agent.performance)
         self.simulation_record.append(sr)
     def export_record(self,file_name):
+        #standardized values
+        land = self.agent_clan.landscape
+        for sr in self.simulation_record:
+            sr.performance = land.get_standardized_value(sr.performance)
         #for plot
         simple_simulation_record = [(sr.ct,sr.performance) for sr in self.simulation_record]
         nrow = len(simple_simulation_record)
@@ -55,19 +59,16 @@ class Simulator:
             writer.writerow([sr.location_id, sr.ct, sr.plan, sr.performance])
         f_record.close()
         #for profile
-        sim_profile = self.__str__()
         plan_profile = self.adapter_plan_profile
         clan_profile =  self.agent_clan.__str__()
         behavior_profile = self.adapter_behavior_profile
         time_stamp = time.ctime()
         file_name_profile = "%s_profile.txt" % file_name
         f_profile = open(file_name_profile,'wb')
-        writer = csv.writer(f_profile,lineterminator='\n',delimiter='\t')
-        writer.writerow(sim_profile)
-        writer.writerow(time_stamp)
-        writer.writerow(plan_profile)
-        writer.writerow(clan_profile)
-        writer.writerow(behavior_profile)
+        f_profile.write(time_stamp)
+        f_profile.write(plan_profile)
+        f_profile.write(clan_profile)
+        f_profile.write(behavior_profile)
         f_profile.close()
 class AdapterPlan:
     def __init__(self, simulator, adapter_behavior, agent_clan, agent, tick_end):

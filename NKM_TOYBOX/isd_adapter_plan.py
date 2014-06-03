@@ -24,7 +24,7 @@ class AdapterPlanISD(AdapterPlan):
         self.agent_clan = agent_clan
         self.agent = agent
         self.tick_end = tick_end
-        self.uncertainty_base = self.simulator.uncertainty_base
+        self.uncertainty_base = agent_clan.uncertainty_base
     def my_profile(cls):
         return "\nPlan for ISD Development Simulation\n"
     profile = classmethod(my_profile)
@@ -48,8 +48,9 @@ class AdapterPlanISD(AdapterPlan):
         # expected performance := true fitness value +- error (i.e., uncertainty ~ uniform(given range))
         # When a project starts, nobody knows feedback from customers. The team may rely on market research data.
         agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
+        agent.performance = agent.true_performance
         # But God knows a true performance.
-        self.simulator.write_record(agent.true_performance,ct)
+        self.simulator.write_record(agent)
         # Let's write the true result as a record
         agent.visited_ids[agent.my_id]='v'
         # Since the starting point is already visited...
@@ -60,13 +61,14 @@ class AdapterPlanISD(AdapterPlan):
         while 1:
             for plan in agent.plans: #per each plan
                 #TODO - adjust as N size varies
-                self.agent_clan.landscape.compute_all_locations_id(do_standardize = True, fix_plan = plan)
+                self.agent_clan.landscape.compute_all_locations_id(fix_plan = plan)
                 agent.ct = ct # let him know the current tick(=time)
                 (agent.my_id, agent.true_performance) = current_behavior.execute(agent, plan) #update
+                agent.performance = agent.true_performance
                 # Let the agent work a planned task at a given time (linearly or cyclically)
                 # agent update the current location and performance as a result
                 ct += 1 # increase time
-                self.simulator.write_record(agent.true_performance,ct) # write a record after work
+                self.simulator.write_record(agent) # write a record after work
                 if ct >= self.tick_end: # if ticks are over the target number,
                     break_marker = True # let the break mark true
                     break #abandon the plan

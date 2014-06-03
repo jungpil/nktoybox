@@ -71,6 +71,7 @@ class AgentClan:
         input value -> [(1,2,3),(4,5,6),(7,8,9)]
         """
         #check data
+        self.my_N = self.landscape.get_influence_matrix_N()
         assert sum(map(len,iteration_plan)) == self.my_N, "You have a problem on the iteration plan!"
         total_item = []
         for ep in iteration_plan:
@@ -79,7 +80,7 @@ class AgentClan:
         total_item.sort() #sort (ascending)
         #report any missing values in the plan
         c_set_1 = NP.array(total_item,dtype=NP.int)
-        c_set_2 = NP.arange(1,(self.my_N+1),dtype=NP.int)
+        c_set_2 = NP.arange(0,(self.my_N),dtype=NP.int)
         c_diff = c_set_1 - c_set_2
         if sum(c_diff) != 0:
             report = NP.where(c_diff != 0)[0]+1
@@ -108,7 +109,7 @@ class Agent:
     '''
     def __init__(self,my_id,my_clan):
         self.my_id  = my_id
-        self.my_performance = 0.0 #this is default value of getting fitness value
+        self.performance = 0.0 #this is default value of getting fitness value
         self.my_clan = my_clan #landscape
         self.my_status = -1
         self.plans = [] #should be implemented

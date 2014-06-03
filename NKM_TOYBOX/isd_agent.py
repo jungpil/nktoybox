@@ -41,6 +41,7 @@ class AgileDeveloperClan(AgentClan):
     """
     def __init__(self,landscape, processing_power, agent_class, population=1):
         AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
+        self.uncertainty_base = 0.0
     def hatch_members(self):
         """
 |  A clan is just a container. We need agents first. Make them.
@@ -69,6 +70,7 @@ class WaterfallDeveloperClan(AgentClan):
     """
     def __init__(self,landscape, processing_power, agent_class, population=1, feedback_tick = 5):
         AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
+        self.uncertainty_base = 0.0
         self.feedback_tick = feedback_tick # get feedback on every fifth tick
     def hatch_members(self):
         """

@@ -214,6 +214,7 @@ the performance value, then return.
         map_size = 1 << self.get_influence_matrix_N()
         self.locations_list = []
         add_locs = self.locations_list.append
+        self.fix_plan = fix_plan
         for i in xrange(map_size):
             add_locs(self.location_id_to_location(i))
         '''
@@ -376,6 +377,7 @@ class LandscapeAdaptive(Landscape):
         map_size = 1 << self.get_influence_matrix_N()
         self.locations_list = []
         add_locs = self.locations_list.append
+        self.fix_plan = fix_plan
         for i in xrange(map_size):
             add_locs(self.location_id_to_location(i))
     def get_score_of_location_by_id(self,location_id): # KEY!

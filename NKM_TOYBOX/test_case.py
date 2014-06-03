@@ -1,10 +1,11 @@
 #Testing
 import simulator
+import sys
 from landscape import FitnessContributionTable
 from landscape import construct_influence_matrix_from_file
 from isd_agent import AgileDeveloper
 from isd_agent import AgileDeveloperClan
-from landscape import Landscape
+from landscape import Landscape,LandscapeAdaptive
 from isd_adapter_plan import AdapterPlanISD
 from isd_strategy import AdapterBehaviorAgileTeam
 from isd_agent import WaterfallDeveloper
@@ -12,10 +13,10 @@ from isd_agent import WaterfallDeveloperClan
 from isd_adapter_plan import AdapterPlanISD
 from isd_strategy import AdapterBehaviorWaterfallTeam
 
-def factory_landscape(file_name,uncertainty):
+def factory_landscape(file_name):
     inf = construct_influence_matrix_from_file(file_name,markchr='x')
     fit = FitnessContributionTable(inf)
-    land = Landscape(fitness_contribution_matrix=fit,uncertainty=uncertainty)
+    land = LandscapeAdaptive(fitness_contribution_matrix=fit)
     land.compute_all_locations_id()
     return land
 def factory_agile_clan(land,plans):
@@ -32,7 +33,9 @@ def run_simulation(clan,n,adapter,output_file_name):
     sim1 = simulator.Simulator(clan)
     for i in xrange(n):
         sim1.run(30,AdapterPlanISD,adapter)
-        print "%04d ..." % i
+        sys.stdout.write("%04d ... " % i)
+        if i > 0 and i % 10 == 0:
+            print ""
     sim1.export_record(output_file_name)
     print "OK"
 

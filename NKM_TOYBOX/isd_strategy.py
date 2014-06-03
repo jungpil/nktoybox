@@ -34,6 +34,7 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
             for neighbor_id in np.nditer(neighbors_np):
                 new_score = self.agent_clan.landscape.get_noised_score_of_location_by_id(
                                     int(neighbor_id), 
+                                    uncertainty_base = self.agent_clan.uncertainty_base,
                                     func = linear_uncertainty, 
                                     tick = agent.ct,
                                     total_tick = agent.tick_end)
@@ -49,7 +50,8 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
         new_performance = agent.true_performance
         return (new_id,new_performance)
     def my_profile(cls):
-        rv = "----------------------------\n%s----------------------------\n" % ("Agile Development Team")
+        rv = "----------------------------\n%s\n----------------------------\n" % ("Agile Development Team")
+        return rv
     profile = classmethod(my_profile)
 class AdapterBehaviorWaterfallTeam(AdapterBehavior):
     """
@@ -70,7 +72,8 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
             for neighbor_id in neighbors:
                 lv = self.agent_clan.landscape.get_noised_score_of_location_by_id(
                                                                                                         int(neighbor_id), 
-                                                                                                        func = linear_uncertainty, 
+                                                                                                        func = linear_uncertainty,
+                                                                                                        uncertainty_base = self.agent_clan.uncertainty_base,
                                                                                                         tick = agent.ct,
                                                                                                         total_tick = agent.tick_end) 
                 new_scores_append(lv)
@@ -83,11 +86,12 @@ class AdapterBehaviorWaterfallTeam(AdapterBehavior):
         elif (agent.ct % agent.feedback_tick) == (agent.feedback_tick - 2): # n-1, deployment
             if agent.wanna_be_my_id >= 0:
                 agent.my_id = agent.wanna_be_my_id
-                agent.visited_ids[new_id]='v'
+                agent.visited_ids[agent.my_id]='v'
         new_id = agent.my_id
         new_performance = agent.true_performance
         return (new_id,new_performance)
     def my_profile(cls):
-        rv = "----------------------------\n%s----------------------------\n" % ("Waterfall Development Team")
+        rv = "----------------------------\n%s\n----------------------------\n" % ("Waterfall Development Team")
+        return rv
     profile = classmethod(my_profile)
 # END OF PROGRAM #
