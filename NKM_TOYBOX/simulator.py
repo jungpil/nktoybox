@@ -83,13 +83,13 @@ class AdapterPlan:
         break_marker = False
         ct = 0
         agent.my_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
-        self.simulator.write_record(agent.my_performance,ct)
+        self.simulator.write_record(agent)
         while 1:
             for plan in agent.plans:
                 agent.ct = ct
                 (agent.my_id, agent.my_performance) = current_behavior.execute(agent, plan)
                 ct += 1
-                self.simulator.write_record(agent.my_performance,ct)
+                self.simulator.write_record(agent)
                 if ct >= self.tick_end: # if ticks are over the target number,
                     break_marker = True
                     break

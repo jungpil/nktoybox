@@ -41,6 +41,7 @@ class AgentClan:
         self.member_identification_record = []
         self.agent_class = agent_class
         self.iteration_plan = None
+        self.fix_plan= None
     def hatch_members(self):
         '''
         >>> my_tribe.hatch_members(MyAgent) # MyAgent is a class
@@ -53,6 +54,7 @@ class AgentClan:
             member_loc_id = random.randint(0,upper_limit)
             agent = self.agent_class(member_loc_id,self)
             agent.visited_ids[member_loc_id] = 'v' #visit
+            agent.plans = self.iteration_plan
             add_member(agent)
         self.number_of_not_finished = self.total_num
     def refresh_clan(self):

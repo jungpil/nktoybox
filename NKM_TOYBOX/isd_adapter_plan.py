@@ -22,6 +22,7 @@ class AdapterPlanISD(AdapterPlan):
         self.simulator = simulator
         self.adapter_behavior = adapter_behavior
         self.agent_clan = agent_clan
+        self.fix_plan = self.agent_clan.fix_plan
         self.agent = agent
         self.tick_end = tick_end
         self.uncertainty_base = agent_clan.uncertainty_base
@@ -40,8 +41,8 @@ class AdapterPlanISD(AdapterPlan):
         ct = 0 #current time
         #### INITIALIZATION ####
         agent.expected_performance = self.agent_clan.landscape.get_noised_score_of_location_by_id(
-                                                                                                                                    agent.my_id, 
-                                                                                                                                    func = linear_uncertainty, 
+                                                                                                                                    agent.my_id,
+                                                                                                                                    func = linear_uncertainty,
                                                                                                                                     uncertainty_base = self.uncertainty_base,
                                                                                                                                     tick = ct,
                                                                                                                                     total_tick = agent.tick_end)
@@ -56,12 +57,12 @@ class AdapterPlanISD(AdapterPlan):
         # Since the starting point is already visited...
         agent.wanna_be_my_id = agent.my_id # not want to go anywhere at start
         # Do not want to go somewhere now...
-        
+
         #### SEARCHING ####
         while 1:
             for plan in agent.plans: #per each plan
                 #TODO - adjust as N size varies
-                self.agent_clan.landscape.compute_all_locations_id(fix_plan = plan)
+                self.agent_clan.landscape.compute_all_locations_id(fix_plan = self.fix_plan)
                 agent.ct = ct # let him know the current tick(=time)
                 (agent.my_id, agent.true_performance) = current_behavior.execute(agent, plan) #update
                 agent.performance = agent.true_performance

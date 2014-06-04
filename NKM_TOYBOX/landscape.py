@@ -371,20 +371,22 @@ class Landscape:
         return self.location_to_location_id(list(locations))
     def create_dimension_external_element(self,locations,bounded_elements):
         N = len(locations) - len(bounded_elements)
-        if N == 0:
-            return 0.0
         seq_rep = [list(s) for s in itertools.product("01",repeat=N)]
         seq_rep = NP.array(seq_rep,dtype=NP.int)
         locations_new = []
-        for sr in seq_rep:
-            blank = locations.copy()
-            new_mask = list(set(NP.arange(locations.size)) - set(bounded_elements))
-            blank[new_mask] = sr
-            locations_new.append(blank)
+        if seq_rep.size > 0:
+            for sr in seq_rep:
+                blank = locations.copy()
+                new_mask = list(set(NP.arange(locations.size)) - set(bounded_elements))
+                blank[new_mask] = sr
+                locations_new.append(blank)
+        else:
+            locations_new.append(locations)
         original_ids = []
         for lnew in locations_new:
             original_ids.append(self.location_to_location_id(lnew))
-        unbounded_element = list(set(xrange(self.get_influence_matrix_N())) - set(bounded_elements))
+        #unbounded_element = list(set(range(self.get_influence_matrix_N())) - set(bounded_elements))
+        unbounded_element = range(self.get_influence_matrix_N())
         results = []
         for original_id in original_ids:
             locations_orign = self.locations_list[original_id]
