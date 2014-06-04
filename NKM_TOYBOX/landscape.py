@@ -232,6 +232,7 @@ class Landscape:
         '''
         Statistics
         '''
+        self.fitness_value = NP.around(self.fitness_value,4)
     def compute_score_for_location_id(self,location_id,fix_plan=None,reduced=True):
         """
 |  Compute and return the fitness value of the given location id.
@@ -241,40 +242,37 @@ class Landscape:
         locations = self.locations_list[location_id] # first, we need location, ndarray(int)
         result = 0.0 #float
         c_is = []
-        if fix_plan == None:
+        if fix_plan == None or fix_plan == range(self.get_influence_matrix_N()):
             coverage = range(self.get_influence_matrix_N())
+            for i in coverage:
+                idx1 = i # in sequence
+                idx2 = locations[i] # case determined by location id
+                idx3 = 0
+                if self.get_influence_matrix_K() > 0:
+                    dependence = self.influence_matrix.get_dependent_elements_of(i) # given row
+                    locations.dtype = NP.int
+                    dependence.dtype = NP.int
+                    #idx3 = inf_util.compute_idx3(self.get_influence_matrix_K(),locations,dependence)
+                    x = locations[dependence]
+                    a = NP.ones(self.get_influence_matrix_K(),dtype=NP.int) * 2
+                    b = NP.arange(self.get_influence_matrix_K(),dtype=NP.int)
+                    y = a ** b[::-1] #inverse
+                    idx3 = NP.dot(x,y) # step by 2, (0,1), (0,1,2,3), (0,1,2,3,4,5,6,7), (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15) <- spanning vector space (for e.g.)
+                    #idx3_n = 2^n*a_0 + 2^(n-1)*a_1 +...+2^1*a_(n-1)+a_n
+                score = self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
+                result += score
+                if not reduced:
+                    c_is.append(score)
+            rv = result / float(len(coverage))
         else:
-            coverage = fix_plan
-            assert len(coverage) > 0, "You should suggest at least one decision element."
-        for i in coverage:
-            idx1 = i # in sequence
-            idx2 = locations[i] # case determined by location id
-            idx3 = 0
-            if self.get_influence_matrix_K() > 0:
-                dependence = self.influence_matrix.get_dependent_elements_of(i) # given row
-                locations.dtype = NP.int
-                dependence.dtype = NP.int
-                #idx3 = inf_util.compute_idx3(self.get_influence_matrix_K(),locations,dependence)
-                x = locations[dependence]
-                a = NP.ones(self.get_influence_matrix_K(),dtype=NP.int) * 2
-                b = NP.arange(self.get_influence_matrix_K(),dtype=NP.int)
-                y = a ** b[::-1] #inverse
-                idx3 = NP.dot(x,y) # step by 2, (0,1), (0,1,2,3), (0,1,2,3,4,5,6,7), (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15) <- spanning vector space (for e.g.)
-                #idx3_n = 2^n*a_0 + 2^(n-1)*a_1 +...+2^1*a_(n-1)+a_n
-            score = self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
-            result += score
+            assert len(fix_plan) > 0, "You should suggest at least one decision element."
+            N = self.get_influence_matrix_N()
+            N1 = len(fix_plan)
+            N2 = N - N1
+            unknown_effect = self.create_dimension_external_element(locations,fix_plan)
+            rv = unknown_effect
             if not reduced:
-                c_is.append(score)
-        result = result / float(len(coverage))
-        if fix_plan != None:
-            effect = self.create_dimension_external_element(locations,fix_plan)
-##            num_other = self.get_influence_matrix_N() - len(fix_plan)
-##            sum_effect = effect * num_other
-            rv = (result + effect) / float(2)
-            if not reduced:
-                c_is.extend(effect)
-        else:
-            rv = result
+                c_is.extend([unknown_effect for _ in range(N2)])
         if reduced:
             return rv
         else:
@@ -405,7 +403,7 @@ class Landscape:
                     idx3 = NP.dot(x,y)
                 score = self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
                 result += score
-            results.append(result/float(len(original_ids)))
+            results.append(result/float(len(coverage)))
         results = NP.array(results)
         average_effect_from_unknown = float(results.mean())
         return average_effect_from_unknown
@@ -481,7 +479,7 @@ class Probe:
     def __init__(self):
         self.location_id = -1
         self.performance = 0.0
-        #self.moved = False
+        self.moved = False
 def count_local_peak(landscape,plan=None):
     N = landscape.get_influence_matrix_N()
     total_scope = 2**N
@@ -496,25 +494,36 @@ def count_local_peak(landscape,plan=None):
         probe.performance = landscape.get_score_of_location_by_id(probe.location_id)
         probes.append(probe)
         while 1:
-            neighbors = set(landscape.who_are_neighbors(probe.location_id,full_plan,1,True))
+            neighbors = landscape.who_are_neighbors(probe.location_id,full_plan,1,True)
             scores = []
-            max_score = probe.performance
-            max_id = probe.location_id
+            max_score = -1
+            max_id = -1
             for n in neighbors:
                 nei_score = landscape.get_score_of_location_by_id(n)
                 if nei_score > max_score:
                     max_id = n
                     max_score = nei_score
+                elif nei_score == max_score and n > max_id:
+                    max_id = n
             if max_score > probe.performance:
                 probe.location_id = max_id
                 probe.performance = max_score
-                #probe.moved = True
+                probe.moved = True
+            elif max_score == probe.performance:
+                if max_id > probe.location_id:
+                    probe.location_id = max_id
+                    probe.moved = True
+                else:
+                    break
+            elif max_score < probe.performance and probe.moved == False:
+                probe.moved = True
+                break
             else:
                 break
     all_peak = []
     for probe in probes:
-        #if probe.moved:
-        all_peak.append(probe.location_id)
+        if probe.moved:
+            all_peak.append(probe.location_id)
     all_peak = set(all_peak)
     return len(all_peak)
 '''
