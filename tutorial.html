@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Basic &mdash; NK Modeling Toybox 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="NK Modeling Toybox 0.1.0 documentation" href="index.html" />
+    <link rel="next" title="Advanced Usage" href="advanced_usage.html" />
+    <link rel="prev" title="Welcome to NK Modeling Toybox’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="advanced_usage.html" title="Advanced Usage"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to NK Modeling Toybox’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">NK Modeling Toybox 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="basic">
+<h1>Basic<a class="headerlink" href="#basic" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dependency">
+<h2>Dependency<a class="headerlink" href="#dependency" title="Permalink to this headline">¶</a></h2>
+<p>under construction</p>
+</div>
+<div class="section" id="how-to-construct-an-influence-matrix">
+<h2>How to Construct an Influence Matrix<a class="headerlink" href="#how-to-construct-an-influence-matrix" title="Permalink to this headline">¶</a></h2>
+<p>First, let&#8217;s open a text editor. Input the following characters. The mark &#8216;x&#8217; means interdependency.</p>
+<img alt="_images/tutorial_1_01.png" src="_images/tutorial_1_01.png" />
+<p>Save the file as &#8220;n16k15.txt&#8221;.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">n16k15 represents, N=16 (the number of configuration elements) and K=15 (the number of interdependency)</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">construct_influence_matrix_from_file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inf</span> <span class="o">=</span> <span class="n">construct_influence_matrix_from_file</span><span class="p">(</span><span class="s">&#39;n16k15.txt&#39;</span><span class="p">,</span><span class="n">markchr</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">inf</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;;&quot;</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can see the following result.</p>
+<img alt="_images/tutorial_1_02.png" src="_images/tutorial_1_02.png" />
+</div>
+<div class="section" id="how-to-construct-a-fitness-contribution-table">
+<h2>How to Construct a Fitness Contribution Table<a class="headerlink" href="#how-to-construct-a-fitness-contribution-table" title="Permalink to this headline">¶</a></h2>
+<p>A fitness contribution table needs an influence matrix. Since we already have one, let&#8217;s create our fitness contribution table by typing as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">FitnessContributionTable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit1</span> <span class="o">=</span> <span class="n">FitnessContributionTable</span><span class="p">(</span><span class="n">inf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to generate an influence matrix programmatically, it is better to use a list object as following.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">construct_influence_matrix_from_list</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">FitnessContributionTable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">im_list</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inf</span> <span class="o">=</span> <span class="n">construct_influence_matrix_from_list</span><span class="p">(</span><span class="n">im_list</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit1</span> <span class="o">=</span> <span class="n">FitnessContributionTable</span><span class="p">(</span><span class="n">inf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s confirm the result.</p>
+<img alt="_images/tutorial_2_02.jpg" src="_images/tutorial_2_02.jpg" />
+<p>The result is identical when we use the following form as a text file.</p>
+<img alt="_images/tutorial_2_01.jpg" src="_images/tutorial_2_01.jpg" />
+<p>You can copy the influence matrix once the fitness contribution table is created.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inf_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">fit1</span><span class="o">.</span><span class="n">influence_matrix</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/tutorial_2_03.jpg" src="_images/tutorial_2_03.jpg" />
+<p>Let&#8217;s examine properties of the influence matrix. You can call the following properties for use.</p>
+<ul class="simple">
+<li><strong>my_N</strong> : the number of configuration elements</li>
+<li><strong>my_K</strong> : the number of interdependency</li>
+<li><strong>my_raw_matrix</strong> : a raw matrix as a <em>numpy.ndarray</em> object</li>
+<li><strong>my_dependence_matrix</strong> : a dependence matrix as a <em>numpy.ndarray</em> object</li>
+</ul>
+<p>The following screenshot shows an example.</p>
+<img alt="_images/tutorial_2_04.jpg" src="_images/tutorial_2_04.jpg" />
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The first index of a dependence matrix is 0. In the example above, the second row indicates that interdepencies are found in 1st, 3rd and 4th location (each corresponding to 0, 2, and 3).</p>
+</div>
+<p>Fitness values in the fitness contribution table are generated randomly. Let&#8217;s type the following code to observe the result.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fit1</span><span class="o">.</span><span class="n">my_table</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+<p>It should be noted that <strong>my_table</strong> is a <em>numpy.ndarray</em> object. If you need more information on how to handle numpy.ndarray, please visit <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html">NumPy ndarray</a> .</p>
+<img alt="_images/tutorial_2_05.jpg" src="_images/tutorial_2_05.jpg" />
+<p>The dimension of the fitness table is 6 (= the number of elements) by 2 by 8 ( <span class="math">\(2^3=8\)</span> (= the number of interdependency)).</p>
+<p>Let&#8217;s observe values.</p>
+<img alt="_images/tutorial_2_06.jpg" src="_images/tutorial_2_06.jpg" />
+<p>Also, you can use a method to get the value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fit1</span><span class="o">.</span><span class="n">get_value_of</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-to-draw-a-landscape">
+<h2>How to Draw a Landscape<a class="headerlink" href="#how-to-draw-a-landscape" title="Permalink to this headline">¶</a></h2>
+<p>A landscape is a key element for developing a NK Landscape simulator. Simply, you can create an object of Landscape as following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">Landscape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span> <span class="o">=</span> <span class="n">Landscape</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fit1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Currently, we do have location IDs. To make agents search locations, those IDs are made priorly.</p>
+<img alt="_images/tutorial_3_01.jpg" src="_images/tutorial_3_01.jpg" />
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">compute_all_locations_id</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="_images/tutorial_3_02.jpg" src="_images/tutorial_3_02.jpg" />
+<p>Note that <span class="math">\(2^6 = 64\)</span>.</p>
+<p>To obtain a fitness value for a specific location ID, you can use the method &#8220;get_score_of_location_by_id()&#8221; . For example,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">get_score_of_location_by_id</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following screenshot shows another example.</p>
+<img alt="_images/tutorial_3_03.jpg" src="_images/tutorial_3_03.jpg" />
+<p>Note that every location is defined by a combination of binary expressions. We can exactly retrieve it by using the method, &#8220;location_id_to_location()&#8221; . For example,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">location_id_to_location</span><span class="p">(</span><span class="mi">63</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following screenshot shows another example.</p>
+<img alt="_images/tutorial_3_04.jpg" src="_images/tutorial_3_04.jpg" />
+<p>Let&#8217;s assume that we want to change only one element in a configuration. For example, we want to flip the second element of <span class="math">\(0, 0, 1, 1, 0, 1\)</span>. The location ID is <span class="math">\(2^3+2^2+1 = 13\)</span>. The result should be <span class="math">\(0, 1, 1, 1, 0, 1\)</span>, such that the result ID is <span class="math">\(2^4+2^3+2^2+1 = 29\)</span>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">toggle_element_in_location_id</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that the first index starts with zero(=0).</p>
+</div>
+<p>See also the following screenshot.</p>
+<img alt="_images/tutorial_3_05.jpg" src="_images/tutorial_3_05.jpg" />
+<p>Searching neighbors is one of our primary concerns. Landscape provides a convenient method to get it done. For example, let&#8217;s say we want to search all neighbors of a location ID(=0) in terms of the first and the second configuration element.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">get_neighbors_inclusive</span><span class="p">(</span><span class="mi">0</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument of &#8220;get_neighbors_inclusive&#8221; is location ID. The second is a list of element indices. The last one is processing power.</p>
+<p>The result is:</p>
+<img alt="_images/tutorial_3_06.jpg" src="_images/tutorial_3_06.jpg" />
+<p>If processing power increases to 2, then the program considers a set of two configuration elements as well.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">get_neighbors_inclusive</span><span class="p">(</span><span class="mi">0</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result is:</p>
+<img alt="_images/tutorial_3_07.jpg" src="_images/tutorial_3_07.jpg" />
+<p>Let&#8217;s suppose that an agent wants to imitate a part of configuration from a target agent. You can use the method &#8220;change_element()&#8221; in this case.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">land1</span><span class="o">.</span><span class="n">change_element</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The agent (ID=10) wants to copy a part of configuration (e.g., 1st, 3rd and fifth) of another agent (ID = 50).</p>
+<p>Observe the following screenshot.</p>
+<img alt="_images/tutorial_3_08.jpg" src="_images/tutorial_3_08.jpg" />
+</div>
+<div class="section" id="agent">
+<h2>Agent<a class="headerlink" href="#agent" title="Permalink to this headline">¶</a></h2>
+<p>An agent is an autonomous entity who searches better fitness values in a given landscape. To create a customized agnet for your simulation, inherit Agent class first.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">agent</span> <span class="kn">import</span> <span class="n">Agent</span>
+<span class="k">class</span> <span class="nc">Student</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">my_id</span><span class="p">,</span> <span class="n">my_clan</span><span class="p">):</span>
+        <span class="n">Agent</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">my_id</span><span class="o">=</span><span class="n">my_id</span><span class="p">,</span><span class="n">my_clan</span><span class="o">=</span><span class="n">my_clan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plans</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Let&#8217;s save it as myagent.py .</p>
+<p>We inherit Agent class and set a plan as full search (i.e., the agent view every neighbor who has different element from 1st to 6th one).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">self.plans = [[...]] can have differnt forms. For example, self.plans = [[0,1,2],[3,4,5]] or self.plans = [[0,1],[2,3],[4,5]] .</p>
+</div>
+</div>
+<div class="section" id="agent-clan">
+<h2>Agent Clan<a class="headerlink" href="#agent-clan" title="Permalink to this headline">¶</a></h2>
+<p>An agent clan is a group of agents who search better fitness values in a given landscape.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">agent</span> <span class="kn">import</span> <span class="n">AgentClan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myagent</span> <span class="kn">import</span> <span class="n">Student</span> <span class="c"># myagent.py should be included in the same directory.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aclan</span> <span class="o">=</span> <span class="n">AgentClan</span><span class="p">(</span><span class="n">land1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Student</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>parameter 1(=land1): a landscape object</li>
+<li>parameter 2(=1): processing power (see also, Landscape.get_neighbors_inclusive() method)</li>
+<li>parameter 3(=Student): an agent model</li>
+<li>parameter 4(=100): the number of agents in a group.</li>
+</ul>
+<p>Let&#8217;s call them &#8220;students&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aclan</span><span class="o">.</span><span class="n">name_called</span><span class="p">(</span><span class="s">&quot;students&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, let&#8217;s assign 100 students to the agent clan.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aclan</span><span class="o">.</span><span class="n">hatch_members</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-simulator">
+<h2>Run Simulator<a class="headerlink" href="#run-simulator" title="Permalink to this headline">¶</a></h2>
+<p>To run a simulation, we need to define three things.</p>
+<ol class="arabic simple">
+<li>Plan</li>
+<li>Behavior</li>
+<li>Simulator</li>
+</ol>
+<p><strong>Plan</strong> refers to a way of managing the simulation process. We have a simple but useful class for standard Plan, &#8220;AdapterPlan&#8221;. If you need to define your own simulation plan, create your own plan based on AdapterPlan.</p>
+<p><strong>Behavior</strong> refers to a searching strategy of agent. You can also define your own types of behavior. Currently, we deploy two basic search behaviors: greed search and adaptive search. You can find the AdapterBehaviorGreed class and the AdapterBehaviorAdaptive in strategy.py .</p>
+<p><strong>Simulator</strong> is a body of your simulator. You have to put an agent clan to initiate it. To run a simulation, input a target time tick, Plan and Behavior. In addition, all results of your simulation is stored in the simulator object.</p>
+<p>Let&#8217;s observe an example.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">strategy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">simulator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sim1</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">Simulator</span><span class="p">(</span><span class="n">aclan</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sim1</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="n">simulator</span><span class="o">.</span><span class="n">AdapterPlan</span><span class="p">,</span> <span class="n">strategy</span><span class="o">.</span><span class="n">AdapterBehaviorGreed</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We run the first simulation by setting up 30(=time tick), AdapterPlan and AdapterBehaviorGreed.</p>
+<p>Let&#8217;s experiment 19 times more.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">19</span><span class="p">):</span>
+<span class="go">    sim1.run(30, simulator.AdapterPlan, strategy.AdapterBehaviorGreed)</span>
+</pre></div>
+</div>
+<p>For the same simulator object, the result of each simulation is accumulated.</p>
+<p>To export the result, you can run the following command.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sim1</span><span class="o">.</span><span class="n">export_record</span><span class="p">(</span><span class="s">&#39;test_exp_greed.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At this time, we are going to use AdapterBehaviorAdaptive as Behavior.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sim2</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">Simulator</span><span class="p">(</span><span class="n">aclan</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+<span class="go">    sim2.run(30, simulator.AdapterPlan, strategy.AdapterBehaviorAdaptive)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sim2</span><span class="o">.</span><span class="n">export_record</span><span class="p">(</span><span class="s">&#39;test_exp_adaptive.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We are going to update how to write customized adapters soon.</p>
+</div>
+</div>
+<div class="section" id="read-the-simulation-results-by-excel">
+<h2>Read the Simulation Results by Excel<a class="headerlink" href="#read-the-simulation-results-by-excel" title="Permalink to this headline">¶</a></h2>
+<p>If you have a spreadsheet application, exported data can be easily handled by using a pivot function.
+Let&#8217;s assume that we have Microsoft Excel.</p>
+<p>For Libre Office users, see the following link: <a class="reference external" href="https://help.libreoffice.org/Calc/Creating_Pivot_Tables">Creating Pivot Table</a></p>
+<img alt="_images/tutorial_7_01.jpg" src="_images/tutorial_7_01.jpg" />
+<p>Click <strong>&#8220;From Text&#8221;</strong> to import &#8220;test_exp_greed.txt&#8221;.</p>
+<p>Let&#8217;s label the first row as &#8220;tick&#8221; and &#8220;performance&#8221;, and import data from the second row. You may have the similar screen as we have now.</p>
+<img alt="_images/tutorial_7_02.jpg" src="_images/tutorial_7_02.jpg" />
+<p>Select everything and click the <strong>&#8220;PivotTable&#8221;</strong> in the <strong>Insert Tab</strong>.</p>
+<img alt="_images/tutorial_7_03.jpg" src="_images/tutorial_7_03.jpg" />
+<p>Set <strong>Average</strong> of performance as <strong>Values</strong>, and set tick as <strong>Row</strong> Labels.</p>
+<p>Now, you may see this.</p>
+<img alt="_images/tutorial_7_04.jpg" src="_images/tutorial_7_04.jpg" />
+<p>Repeat the abovementioned process with &#8220;test_exp_adaptive.txt&#8221;.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Basic</a><ul>
+<li><a class="reference internal" href="#dependency">Dependency</a></li>
+<li><a class="reference internal" href="#how-to-construct-an-influence-matrix">How to Construct an Influence Matrix</a></li>
+<li><a class="reference internal" href="#how-to-construct-a-fitness-contribution-table">How to Construct a Fitness Contribution Table</a></li>
+<li><a class="reference internal" href="#how-to-draw-a-landscape">How to Draw a Landscape</a></li>
+<li><a class="reference internal" href="#agent">Agent</a></li>
+<li><a class="reference internal" href="#agent-clan">Agent Clan</a></li>
+<li><a class="reference internal" href="#run-simulator">Run Simulator</a></li>
+<li><a class="reference internal" href="#read-the-simulation-results-by-excel">Read the Simulation Results by Excel</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to NK Modeling Toybox&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="advanced_usage.html"
+                        title="next chapter">Advanced Usage</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="advanced_usage.html" title="Advanced Usage"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to NK Modeling Toybox’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">NK Modeling Toybox 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Jungpil Hahn and Taekyung Kim.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
