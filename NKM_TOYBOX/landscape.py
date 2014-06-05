@@ -445,7 +445,7 @@ Once a landscape is created, every delta periods, each contribution value c_i
         # replace to new contribution values
         # CORRECTION
         for key in self.fitness_value_dict.keys():
-            self.fitness_value_dict[key],self.fitness_correction_item[key] = self.compute_score_for_location_id(location_id,fix_plan=self.fix_plan,reduced=False)
+            self.fitness_value_dict[key],self.fitness_correction_item[key] = self.compute_score_for_location_id(key,fix_plan=self.fix_plan,reduced=False)
     def get_score_of_location_by_id(self,location_id): # KEY!
         try:
             return self.fitness_value_dict[location_id]
