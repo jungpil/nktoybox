@@ -10,7 +10,7 @@ Jungpil and Taekyung
 '''
 
 import numpy as np
-from isd_algorithm import linear_uncertainty
+from algorithm import linear_uncertainty
 from simulator import AdapterPlan
 class AdapterPlanISD(AdapterPlan):
     """

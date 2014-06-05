@@ -1,8 +1,7 @@
 '''
-isd_algorithm.py
+algorithm.py
 
 NK Landscape Model
-Modularity x ISD
 
 Jungpil and Taekyung
 
