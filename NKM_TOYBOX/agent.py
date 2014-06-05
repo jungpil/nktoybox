@@ -60,8 +60,8 @@ class AgentClan:
     def refresh_clan(self):
         self.number_of_finished = self.total_num
         self.hatch_members()
-    def place_in_land(self,landscape):
-        self.landscape = landscape
+##    def place_in_land(self,landscape):
+##        self.landscape = landscape
     def name_called(self,type_name):
         self.type_name = type_name
     def set_constraints(self,constraint):
@@ -100,11 +100,46 @@ class AgentClan:
     def has_next_agent(self):
         return self.my_num < self.total_num
     def __str__(self):
-        rv = "Plan: %s\nProcessing Power: %d\nN: %d\nK: %d\n" % (self.iteration_plan,
-                                                                                            self.myProcessingPower,
-                                                                                            self.landscape.get_influence_matrix_N(),
-                                                                                            self.landscape.get_influence_matrix_K())
+        rv = "Plan: %s\nProcessing Power: %d\nN: %d\nK: %d\n" % (
+                self.iteration_plan,
+                self.myProcessingPower,
+                self.landscape.get_influence_matrix_N(),
+                self.landscape.get_influence_matrix_K())
         return rv
+class AgentClanTeamUp(AgentClan):
+    def __init__(self,landscapeA, landscapeB, processing_power, agent_class, population=1):
+        """
+        # An agent has a processing power (or limited processing capability).
+        """
+        AgentClan.__init__(self,landscapeA,processing_power,agent_class,population)
+        assert processing_power > 0, "Processing power should be positive."
+        self.myProcessingPower = processing_power
+        self.myLocId = -1
+        self.total_num = population #TODO, change the name
+        self.landscapeA = landscapeA #nowhere to go
+        self.landscapeB = landscapeB
+        self.tribe = deque() #list object (python collections)
+        self.number_of_not_finished = -1 #finished work
+        self.member_identification_record = []
+        self.agent_class = agent_class
+        self.iteration_plan = None
+        self.fix_plan= None
+    def hatch_members(self):
+        '''
+        >>> my_tribe.hatch_members(MyAgent) # MyAgent is a class
+        '''
+        space_length = 1<<self.landscape.get_influence_matrix_N()
+        upper_limit = space_length-1
+        self.tribe = deque()
+        add_member = self.tribe.append
+        for _ in xrange(self.total_num):
+            member_loc_id = random.randint(0,upper_limit)
+            agent = self.agent_class(member_loc_id,self)
+            agent.visited_ids[member_loc_id] = 'v' #visit
+            agent.plans = self.iteration_plan
+            agent.team_idx = 0 #if A team works, 0; otherwise 1.
+            add_member(agent)
+        self.number_of_not_finished = self.total_num
 class Agent:
     '''
     Abstract class for agent

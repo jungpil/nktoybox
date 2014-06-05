@@ -53,6 +53,7 @@
 <li><a class="reference internal" href="#low-dimensonality">Low Dimensonality</a></li>
 <li><a class="reference internal" href="#modeling-uncertainty">Modeling Uncertainty</a></li>
 <li><a class="reference internal" href="#modeling-dynamism">Modeling Dynamism</a></li>
+<li><a class="reference internal" href="#modeling-the-modularity-structure">Modeling the Modularity Structure</a></li>
 <li><a class="reference internal" href="#team-up-organizational-structure">Team Up (Organizational Structure)</a></li>
 </ul>
 </li>
@@ -252,8 +253,158 @@
 <p class="last">When the function shocked() is called, all the fitness values which are assigned to the landscape are calculated again; therefore, execution time depends on the number of identified fitness values in the landscape. In addition, we assume that the effect of being shocked is instantly reflected. If you need to put delay of shock, manipulate your AdapterPlan implementation.</p>
 </div>
 </div>
+<div class="section" id="modeling-the-modularity-structure">
+<h2>Modeling the Modularity Structure<a class="headerlink" href="#modeling-the-modularity-structure" title="Permalink to this headline">¶</a></h2>
+<p>Modularity in systems components can be achieved when a system can be decomposed into subsystems where interdependecies among components within each subsystem is high, but interdependencies between components across different subsystems is low.</p>
+<p>This can readily be modeled using the influence matrix by specifying the interdepency structure among design choice components.</p>
+<div class="math">
+\[\begin{split}\begin{pmatrix}
+    1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1
+\end{pmatrix}\\\end{split}\]</div>
+<p class="centered">
+<strong><strong>Modular Structure</strong></strong></p><div class="math">
+\[\begin{split}\begin{pmatrix}
+    1 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\
+    0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \\
+    0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\
+    0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\
+    1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \\
+    0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1
+\end{pmatrix}\\\end{split}\]</div>
+<p class="centered">
+<strong><strong>Random Structure</strong></strong></p><p>To implement different structures, create different influence matrix files and use them to create landscapes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># for example, let&#39;s assume we have two files: modular_inf.txt and random_inf.txt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">construct_influence_matrix_from_file</span> <span class="c"># load module</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inf_modular</span> <span class="o">=</span> <span class="n">construct_influence_matrix_from_file</span><span class="p">(</span><span class="s">&#39;modular_inf.txt&#39;</span><span class="p">,</span><span class="n">markchr</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">FitnessContributionTable</span> <span class="c"># load module</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit_modular</span> <span class="o">=</span> <span class="n">FitnessContributionTable</span><span class="p">(</span><span class="n">inf_modular</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">landscape</span> <span class="kn">import</span> <span class="n">LandscapeAdaptive</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">land_modular</span> <span class="o">=</span> <span class="n">LandscapeAdaptive</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fit_modular</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inf_random</span> <span class="o">=</span> <span class="n">construct_influence_matrix_from_file</span><span class="p">(</span><span class="s">&#39;random_inf.txt&#39;</span><span class="p">,</span><span class="n">markchr</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit_random</span> <span class="o">=</span> <span class="n">FitnessContributionTable</span><span class="p">(</span><span class="n">inf_random</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">land_random</span> <span class="o">=</span> <span class="n">LandscapeAdaptive</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fit_random</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="team-up-organizational-structure">
 <h2>Team Up (Organizational Structure)<a class="headerlink" href="#team-up-organizational-structure" title="Permalink to this headline">¶</a></h2>
+<p>Working together is common in business fields. Let&#8217;s think about requirement engineering (RE) for developing a business software product. RE teams are typically composed of mixture of business domain users and information systems (IS) professionals where business domain users typically possess ample domain knowledge but lack technical knowledge, while the reverse is true for the IS professionals. :) (Of course, there are excepts!)</p>
+<p>The composition of RE teams (let&#8217;s call it &#8220;team up&#8221;) can be modeled by partitioning the design problem (i.e., the N-element vector <span class="math">\(\mathbf{d}\)</span>) into two subsets <span class="math">\(\langle \mathbf{d_{business}}, \mathbf{d_{IS}} \rangle\)</span>, where <span class="math">\(\mathbf{d_{business}} = \langle d_{1},d_{2}, \cdots , d_{m} \rangle\)</span> and <span class="math">\(\mathbf{d_{IS}} = \langle d_{m+1}, d_{m+2}, \cdots , d_{N} \rangle\)</span>, where <span class="math">\(m\)</span> represents the relative importance of business decisions in the development project (<span class="math">\(0 \leq m \leq N\)</span>).</p>
+<p>With this setup, the business domain users are responsible for the business decisions; whereas, the IS professionals are responsible for the technical decisions. During search, each department will only consider changes to its own design problems.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">market_evaluation_by_biz_professional</span> <span class="o">=</span> <span class="n">LandscapeAdaptive</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fitness_of_real_demand</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">market_evaluation_by_is_professional</span> <span class="o">=</span> <span class="n">LandscapeAdaptive</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fitness_of_real_demand</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">re_team</span> <span class="o">=</span> <span class="n">ReTeamClan</span><span class="p">(</span>
+<span class="go">                market_evaluation_by_biz_professional,</span>
+<span class="go">                market_evaluation_by_is_professional,</span>
+<span class="go">                1,</span>
+<span class="go">                RequirementEngineeringTeam,</span>
+<span class="go">                100)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Information processing power is 1 (the third parameter. We will explain it later).</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Let&#39;s assume 100 teams (the last parameter).</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># ReTeamClan is an implementation of agent.AgentClanTeamUp .</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># RequirementEngineeringTeam is an implementation of agent.Agent .</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_plan</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]]</span> <span class="c"># work partition, not knowldge partition</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">knowledge_D</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]]</span> <span class="c"># common knowledge (4th element) and distinctive knowledge (others)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">re_team</span><span class="o">.</span><span class="n">set_iteration_plan</span><span class="p">(</span><span class="n">search_plan</span><span class="p">)</span> <span class="c"># searching behavior (in this case, how to work in working places)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s say the first part is about business domain and the second part is about IS domain. In addition, we assume that business professionals work first and then the IS professionals take over. If The business professional finds better a design configuration, IS professionals must look into it. In this example, we assume that the first, second and third configuration elements are related to business domain knowledge; otherwise, about IS domain knowledge. In some cases, there is a common knowledge pool necessary for both parties. What if a big button for &#8216;searching&#8217; is presented in a toolbox? What if a colorful animation is shown during idle time? Technically, the answers to those decision choices are beneficial in understanding productivity of the application. At the same time, those can be associated marketing as product differentiation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">market_evaluation_by_biz_professional</span><span class="o">.</span><span class="n">compute_all_locations_id</span><span class="p">(</span><span class="n">fix_plan</span> <span class="o">=</span> <span class="n">knowledge_D</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">market_evaluation_by_is_professional</span><span class="o">.</span><span class="n">compute_all_locations_id</span><span class="p">(</span><span class="n">fix_plan</span> <span class="o">=</span> <span class="n">knowledge_D</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>To simulate team behavior, you need to create an implementation class based on landscape.AdapterPlan. As a part of coding, examine the following code:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">simulator</span> <span class="kn">import</span> <span class="n">AdapterPlan</span>
+<span class="k">class</span> <span class="nc">RePlan</span><span class="p">(</span><span class="n">AdapterPlan</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulator</span><span class="p">,</span><span class="n">adapter_behavior</span><span class="p">,</span><span class="n">agent_clan</span><span class="p">,</span><span class="n">agent</span><span class="p">,</span><span class="n">tick_end</span><span class="p">):</span>
+        <span class="n">AdapterPlan</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">simulator</span><span class="o">=</span><span class="n">simulator</span><span class="p">,</span> <span class="n">adapter_behavior</span><span class="o">=</span><span class="n">adapter_behavior</span><span class="p">,</span> <span class="n">agent_clan</span><span class="o">=</span><span class="n">agent_clan</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">tick_end</span><span class="o">=</span><span class="n">tick_end</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">market_evaluation_by_biz_professional</span> <span class="o">=</span> <span class="n">agent_clan</span><span class="o">.</span><span class="n">landscapeA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">market_evaluation_by_is_professional</span> <span class="o">=</span> <span class="n">agent_clan</span><span class="o">.</span><span class="n">landscapeB</span>
+    <span class="k">def</span> <span class="nf">my_profile</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;We are the team!&quot;</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">my_profile</span><span class="p">)</span>
+    <span class="c"># Execution plan</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">team</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="c"># assign one team</span>
+        <span class="n">team</span><span class="o">.</span><span class="n">tick_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tick_end</span> <span class="c"># let the team know about d-day</span>
+        <span class="n">team_behavior</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adapter_behavior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_clan</span><span class="p">,</span><span class="n">team</span><span class="p">)</span> <span class="c"># define behavior</span>
+        <span class="n">break_marker</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># stop marker</span>
+        <span class="n">market_evaluation_by_biz_professional</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">market_evaluation_by_biz_professional</span>
+        <span class="n">market_evaluation_by_is_professional</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">market_evaluation_by_is_professional</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># current time</span>
+        <span class="c"># endowment</span>
+        <span class="n">team</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="n">market_evaluation_by_biz_professional</span><span class="o">.</span><span class="n">get_score_of_location_by_id</span><span class="p">(</span><span class="n">team</span><span class="o">.</span><span class="n">my_id</span><span class="p">)</span> <span class="c"># can be omitted</span>
+        <span class="n">team</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="n">market_evaluation_by_is_professional</span><span class="o">.</span><span class="n">get_score_of_location_by_id</span><span class="p">(</span><span class="n">team</span><span class="o">.</span><span class="n">my_id</span><span class="p">)</span>
+        <span class="n">team</span><span class="o">.</span><span class="n">visited_ids</span><span class="p">[</span><span class="n">team</span><span class="o">.</span><span class="n">my_id</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;v&#39;</span> <span class="c"># mark</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">write_record</span><span class="p">(</span><span class="n">team</span><span class="p">)</span> <span class="c"># recording</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">turn</span><span class="p">,</span> <span class="n">work_task</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">team</span><span class="o">.</span><span class="n">plans</span><span class="p">):</span>
+                <span class="n">team</span><span class="o">.</span><span class="n">ct</span> <span class="o">=</span> <span class="n">ct</span>
+                <span class="k">if</span> <span class="n">turn</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">team</span><span class="o">.</span><span class="n">team_idx</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">team</span><span class="o">.</span><span class="n">team_idx</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">team</span><span class="o">.</span><span class="n">my_id</span><span class="p">,</span> <span class="n">team</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="n">current_behavior</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span><span class="n">work_task</span><span class="p">)</span>
+                <span class="n">ct</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">write_record</span><span class="p">(</span><span class="n">team</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ct</span> <span class="o">&gt;=</span> <span class="n">team</span><span class="o">.</span><span class="n">tick_end</span><span class="p">:</span>
+                    <span class="n">break_marker</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">break_marker</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">break</span>
+</pre></div>
+</td></tr></table></div>
 </div>
 </div>
 

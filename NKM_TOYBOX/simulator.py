@@ -23,7 +23,6 @@ class Simulator:
     def __init__(self,agent_clan):
         self.agent_clan = agent_clan
         self.simulation_record = []
-        self.uncertainty_base = 0.0
     def run(self, tick_end, adapter_plan, adapter_behavior):
         agent_clan = self.agent_clan
         agent_clan.refresh_clan()
@@ -48,7 +47,7 @@ class Simulator:
         for k,l in enumerate(simple_simulation_record):
             a[k,0] = l[0]
             a[k,1] = l[1]
-        file_name_plot = "%s_spreadsheet_plot.txt" % file_name    
+        file_name_plot = "%s_spreadsheet_plot.txt" % file_name
         np.savetxt(file_name_plot,a,fmt=['%d','%.4f'],delimiter=',')
         #for record
         file_name_record = "%s_record.gz" % file_name
@@ -77,6 +76,8 @@ class AdapterPlan:
         self.agent_clan = agent_clan
         self.agent = agent
         self.tick_end = tick_end
+        self.fix_plan = self.agent_clan.fix_plan
+        self.uncertainty_base = agent_clan.uncertainty_base
     def run(self):
         agent = self.agent
         current_behavior = self.adapter_behavior(self.agent_clan,agent)

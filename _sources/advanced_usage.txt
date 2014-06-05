@@ -170,9 +170,140 @@ The function, *linear_shock* is programmed as following:
 ..  note::
 
     When the function shocked() is called, all the fitness values which are assigned to the landscape are calculated again; therefore, execution time depends on the number of identified fitness values in the landscape. In addition, we assume that the effect of being shocked is instantly reflected. If you need to put delay of shock, manipulate your AdapterPlan implementation.
-    
-    
+
+
+Modeling the Modularity Structure
+----------------------------------------------------------
+
+Modularity in systems components can be achieved when a system can be decomposed into subsystems where interdependecies among components within each subsystem is high, but interdependencies between components across different subsystems is low.
+
+This can readily be modeled using the influence matrix by specifying the interdepency structure among design choice components.
+
+..  math::
+
+    \begin{pmatrix}
+        1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1
+    \end{pmatrix}\\
 
     
+..  centered:: **Modular Structure**
+
+
+..  math::
+
+    \begin{pmatrix}
+        1 & 0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 1 \\
+        0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 1 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 1 & 0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 1 \\
+        1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 1
+    \end{pmatrix}\\
+
+    
+..  centered:: **Random Structure**
+
+To implement different structures, create different influence matrix files and use them to create landscapes.
+
+    >>> # for example, let's assume we have two files: modular_inf.txt and random_inf.txt
+    >>> from landscape import construct_influence_matrix_from_file # load module
+    >>> inf_modular = construct_influence_matrix_from_file('modular_inf.txt',markchr='1')
+    >>> from landscape import FitnessContributionTable # load module
+    >>> fit_modular = FitnessContributionTable(inf_modular)
+    >>> from landscape import LandscapeAdaptive
+    >>> land_modular = LandscapeAdaptive(fitness_contribution_matrix = fit_modular)
+    >>> #
+    >>> inf_random = construct_influence_matrix_from_file('random_inf.txt',markchr='1')
+    >>> fit_random = FitnessContributionTable(inf_random)
+    >>> land_random = LandscapeAdaptive(fitness_contribution_matrix = fit_random)
+    
+
+
 Team Up (Organizational Structure)
 ----------------------------------------------------------
+
+Working together is common in business fields. Let's think about requirement engineering (RE) for developing a business software product. RE teams are typically composed of mixture of business domain users and information systems (IS) professionals where business domain users typically possess ample domain knowledge but lack technical knowledge, while the reverse is true for the IS professionals. :) (Of course, there are excepts!)
+
+The composition of RE teams (let's call it "team up") can be modeled by partitioning the design problem (i.e., the N-element vector :math:`\mathbf{d}`) into two subsets :math:`\langle \mathbf{d_{business}}, \mathbf{d_{IS}} \rangle`, where :math:`\mathbf{d_{business}} = \langle d_{1},d_{2}, \cdots , d_{m} \rangle` and :math:`\mathbf{d_{IS}} = \langle d_{m+1}, d_{m+2}, \cdots , d_{N} \rangle`, where :math:`m` represents the relative importance of business decisions in the development project (:math:`0 \leq m \leq N`).
+
+With this setup, the business domain users are responsible for the business decisions; whereas, the IS professionals are responsible for the technical decisions. During search, each department will only consider changes to its own design problems.
+
+    >>> market_evaluation_by_biz_professional = LandscapeAdaptive(fitness_contribution_matrix = fitness_of_real_demand)
+    >>> market_evaluation_by_is_professional = LandscapeAdaptive(fitness_contribution_matrix = fitness_of_real_demand)
+    >>> re_team = ReTeamClan(
+                    market_evaluation_by_biz_professional,
+                    market_evaluation_by_is_professional,
+                    1,
+                    RequirementEngineeringTeam,
+                    100)
+    >>> # Information processing power is 1 (the third parameter. We will explain it later).
+    >>> # Let's assume 100 teams (the last parameter).
+    >>> # ReTeamClan is an implementation of agent.AgentClanTeamUp .
+    >>> # RequirementEngineeringTeam is an implementation of agent.Agent .
+    >>> search_plan = [[0,1,2],[3,4,5,6,7,8,9]] # work partition, not knowldge partition
+    >>> knowledge_D = [[0,1,2,3],[3,4,5,6,7,8,9]] # common knowledge (4th element) and distinctive knowledge (others)
+    >>> re_team.set_iteration_plan(search_plan) # searching behavior (in this case, how to work in working places)
+    
+Let's say the first part is about business domain and the second part is about IS domain. In addition, we assume that business professionals work first and then the IS professionals take over. If The business professional finds better a design configuration, IS professionals must look into it. In this example, we assume that the first, second and third configuration elements are related to business domain knowledge; otherwise, about IS domain knowledge. In some cases, there is a common knowledge pool necessary for both parties. What if a big button for 'searching' is presented in a toolbox? What if a colorful animation is shown during idle time? Technically, the answers to those decision choices are beneficial in understanding productivity of the application. At the same time, those can be associated marketing as product differentiation.
+
+    >>> market_evaluation_by_biz_professional.compute_all_locations_id(fix_plan = knowledge_D[0])
+    >>> market_evaluation_by_is_professional.compute_all_locations_id(fix_plan = knowledge_D[1])
+    
+To simulate team behavior, you need to create an implementation class based on landscape.AdapterPlan. As a part of coding, examine the following code:
+
+..  code-block:: python
+    :linenos:
+
+    from simulator import AdapterPlan
+    class RePlan(AdapterPlan):
+        def __init__(self, simulator,adapter_behavior,agent_clan,agent,tick_end):
+            AdapterPlan.__init__(self,simulator=simulator, adapter_behavior=adapter_behavior, agent_clan=agent_clan, agent=agent, tick_end=tick_end)
+            self.market_evaluation_by_biz_professional = agent_clan.landscapeA
+            self.market_evaluation_by_is_professional = agent_clan.landscapeB
+        def my_profile(cls):
+            return "We are the team!"
+        profile = classmethod(my_profile)
+        # Execution plan
+        def run(self):
+            team = self.agent # assign one team
+            team.tick_end = self.tick_end # let the team know about d-day
+            team_behavior = self.adapter_behavior(self.agent_clan,team) # define behavior
+            break_marker = False # stop marker
+            market_evaluation_by_biz_professional = self.market_evaluation_by_biz_professional
+            market_evaluation_by_is_professional = self.market_evaluation_by_is_professional
+            ct = 0 # current time
+            # endowment
+            team.performance = market_evaluation_by_biz_professional.get_score_of_location_by_id(team.my_id) # can be omitted
+            team.performance = market_evaluation_by_is_professional.get_score_of_location_by_id(team.my_id)
+            team.visited_ids[team.my_id] = 'v' # mark
+            self.simulator.write_record(team) # recording
+            while 1:
+                for turn, work_task in enumerate(team.plans):
+                    team.ct = ct
+                    if turn < 1:
+                        team.team_idx = 0
+                    else:
+                        team.team_idx = 1
+                    team.my_id, team.performance = current_behavior.execute(agent,work_task)
+                    ct += 1
+                    self.simulator.write_record(team)
+                    if ct >= team.tick_end:
+                        break_marker = True
+                        break
+                if break_marker == True:
+                    break
+    
+    

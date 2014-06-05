@@ -19,13 +19,6 @@ class AdapterPlanISD(AdapterPlan):
     """
     def __init__(self, simulator, adapter_behavior, agent_clan, agent, tick_end):
         AdapterPlan.__init__(self,simulator=simulator, adapter_behavior=adapter_behavior, agent_clan=agent_clan, agent=agent, tick_end=tick_end)
-        self.simulator = simulator
-        self.adapter_behavior = adapter_behavior
-        self.agent_clan = agent_clan
-        self.fix_plan = self.agent_clan.fix_plan
-        self.agent = agent
-        self.tick_end = tick_end
-        self.uncertainty_base = agent_clan.uncertainty_base
     def my_profile(cls):
         return "\nPlan for ISD Development Simulation\n"
     profile = classmethod(my_profile)
