@@ -1,4 +1,4 @@
-﻿Tutorial
+﻿Basic
 ========================================
 
 Dependency
@@ -285,7 +285,7 @@ Let's label the first row as "tick" and "performance", and import data from the 
 
 ..  image:: tutorial_7_02.jpg
 
-Select everything and click the **"PivotTable"** and the Insert Tab.
+Select everything and click the **"PivotTable"** in the **Insert Tab**.
 
 ..  image:: tutorial_7_03.jpg
 
