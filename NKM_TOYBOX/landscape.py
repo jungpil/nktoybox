@@ -212,6 +212,9 @@ class Landscape:
         """
 |  Brutely compute all before we do something
         """
+        # check assumptions
+        if fix_plan != None:
+            assert len(fix_plan) > 0, "You should provide at least one configuration element for fix_plan."
         map_size = 1 << self.get_influence_matrix_N()
         self.locations_list = []
         add_locs = self.locations_list.append
@@ -229,54 +232,86 @@ class Landscape:
             for l_id in xrange(map_size):
                 result_temp_add(self.compute_score_for_location_id(l_id,fix_plan = fix_plan))
             self.fitness_value = NP.array(result_temp)
-        '''
-        Statistics
-        '''
         self.fitness_value = NP.around(self.fitness_value,4)
     def compute_score_for_location_id(self,location_id,fix_plan=None,reduced=True):
         """
 |  Compute and return the fitness value of the given location id.
 |  fix_plan indicates cognitive representation for low dimensionality (see Gavetti 2000)
+|  In case of LandscapeAdaptive class, turn on the option 'redueced' as False.
+|  Then you get a return value in a form of Tuple object consisting of (value, c_is).
         """
+        # check assumptions
         assert len(self.locations_list) > 0, "You should specify location ids first."
+        if self.fix_plan == None and fix_plan != None:
+            self.fix_plan = fix_plan
+        elif self.fix_plan != None and fix_plan == None:
+            fix_plan = self.fix_plan
+        elif self.fix_plan != None and fix_plan != None:
+            self.fix_plan = fix_plan
+        # data
         locations = self.locations_list[location_id] # first, we need location, ndarray(int)
-        result = 0.0 #float
+        if fix_plan != None:
+            bounded_elements = fix_plan
+        else:
+            bounded_elements = range(self.get_influence_matrix_N()) # full cognition
+        N = len(locations) - len(bounded_elements)
+        original_ids = []
+        locations_new = []
+        results = []
         c_is = []
-        if fix_plan == None or fix_plan == range(self.get_influence_matrix_N()):
-            coverage = range(self.get_influence_matrix_N())
-            for i in coverage:
+        '''
+The object c_is is used for remapping (or transforming) contribution values temporarily.
+See also, the topic of dealing uncertainty in the documentation.
+        '''
+        coverage = range(self.get_influence_matrix_N())
+        # bounded area marking
+        seq_rep = [list(s) for s in itertools.product("01",repeat=N)]
+        seq_rep = NP.array(seq_rep,dtype=NP.int)
+        if seq_rep.size > 0:
+            for sr in seq_rep:
+                blank = locations.copy()
+                new_mask = list(set(NP.arange(locations.size)) - set(bounded_elements))
+                blank[new_mask] = sr
+                locations_new.append(blank)
+        else:
+            locations_new.append(locations)
+        # locations_new <- sigma(F(d))
+        # transform location to Numpy array
+        for lnew in locations_new:
+            original_ids.append(self.location_to_location_id(lnew))
+        # MAIN PROCESS -------------------------------------------------
+        for original_id in original_ids: # sigma
+            locations_orign = self.locations_list[original_id]
+            result = 0.0
+            for i in coverage: # F(d)
                 idx1 = i # in sequence
-                idx2 = locations[i] # case determined by location id
+                idx2 = locations_orign[i] # case determined by location id
                 idx3 = 0
+                # dependency
                 if self.get_influence_matrix_K() > 0:
                     dependence = self.influence_matrix.get_dependent_elements_of(i) # given row
-                    locations.dtype = NP.int
-                    dependence.dtype = NP.int
-                    #idx3 = inf_util.compute_idx3(self.get_influence_matrix_K(),locations,dependence)
-                    x = locations[dependence]
+                    x = locations_orign[dependence]
                     a = NP.ones(self.get_influence_matrix_K(),dtype=NP.int) * 2
                     b = NP.arange(self.get_influence_matrix_K(),dtype=NP.int)
                     y = a ** b[::-1] #inverse
-                    idx3 = NP.dot(x,y) # step by 2, (0,1), (0,1,2,3), (0,1,2,3,4,5,6,7), (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15) <- spanning vector space (for e.g.)
-                    #idx3_n = 2^n*a_0 + 2^(n-1)*a_1 +...+2^1*a_(n-1)+a_n
+                    idx3 = NP.dot(x,y)
                 score = self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
+                # sum up
                 result += score
                 if not reduced:
                     c_is.append(score)
-            rv = result / float(len(coverage))
+            results.append(result/float(len(coverage)))
+        results = NP.array(results)
+        # result
+        if results.size > 0:
+            average_effect_from_unknown = float(results.mean())
         else:
-            assert len(fix_plan) > 0, "You should suggest at least one decision element."
-            N = self.get_influence_matrix_N()
-            N1 = len(fix_plan)
-            N2 = N - N1
-            unknown_effect = self.create_dimension_external_element(locations,fix_plan)
-            rv = unknown_effect
-            if not reduced:
-                c_is.extend([unknown_effect for _ in range(N2)])
+            average_effect_from_unknown = 0.0
+        # output form
         if reduced:
-            return rv
+            return average_effect_from_unknown
         else:
-            return (rv,NP.array(c_is))
+            return (average_effect_from_unknown,NP.array(c_is))
     def location_id_to_location(self,location_id):
         """
 |  Return an integer array that "looks" like the binary form of the given
@@ -369,46 +404,6 @@ class Landscape:
         for i in changable_elements:
             locations[i] = location_masks[i]
         return self.location_to_location_id(list(locations))
-    def create_dimension_external_element(self,locations,bounded_elements):
-        N = len(locations) - len(bounded_elements)
-        seq_rep = [list(s) for s in itertools.product("01",repeat=N)]
-        seq_rep = NP.array(seq_rep,dtype=NP.int)
-        locations_new = []
-        if seq_rep.size > 0:
-            for sr in seq_rep:
-                blank = locations.copy()
-                new_mask = list(set(NP.arange(locations.size)) - set(bounded_elements))
-                blank[new_mask] = sr
-                locations_new.append(blank)
-        else:
-            locations_new.append(locations)
-        original_ids = []
-        for lnew in locations_new:
-            original_ids.append(self.location_to_location_id(lnew))
-        #unbounded_element = list(set(range(self.get_influence_matrix_N())) - set(bounded_elements))
-        unbounded_element = range(self.get_influence_matrix_N())
-        results = []
-        for original_id in original_ids:
-            locations_orign = self.locations_list[original_id]
-            result = 0.0 #float
-            coverage = unbounded_element
-            for i in coverage:
-                idx1 = i # in sequence
-                idx2 = locations_orign[i] # case determined by location id
-                idx3 = 0
-                if self.get_influence_matrix_K() > 0:
-                    dependence = self.influence_matrix.get_dependent_elements_of(i) # given row
-                    x = locations_orign[dependence]
-                    a = NP.ones(self.get_influence_matrix_K(),dtype=NP.int) * 2
-                    b = NP.arange(self.get_influence_matrix_K(),dtype=NP.int)
-                    y = a ** b[::-1] #inverse
-                    idx3 = NP.dot(x,y)
-                score = self.fitness_contribution_table.get_value_of(idx1, idx2, idx3)
-                result += score
-            results.append(result/float(len(coverage)))
-        results = NP.array(results)
-        average_effect_from_unknown = float(results.mean())
-        return average_effect_from_unknown
     def standardize(self):
         assert len(self.fitness_value) > 0, "No fitness values are assigned."
         self.fitness_max = NP.max(self.fitness_value)
@@ -431,6 +426,8 @@ class LandscapeAdaptive(Landscape):
         """
 |  Brutely compute all before we do something
         """
+        if fix_plan != None:
+            assert len(fix_plan) > 0, "You should provide at least one configuration element for fix_plan."
         map_size = 1 << self.get_influence_matrix_N()
         self.locations_list = []
         add_locs = self.locations_list.append
@@ -478,50 +475,73 @@ Once a landscape is created, every delta periods, each contribution value c_i
             self.standardize()
         return fitness_value / float(self.fitness_max)
 class Probe:
+    """
+|  An agent for searching local peaks.
+    """
     def __init__(self):
         self.location_id = -1
         self.performance = 0.0
         self.moved = False
-def count_local_peak(landscape,plan=None):
+def count_local_peak(landscape, quietly = True):
+    """
+|  Find local peaks to return the number.
+    """
+    # data
     N = landscape.get_influence_matrix_N()
-    total_scope = 2**N
-    if plan == None:
-        full_plan = range(N)
-    else:
-        full_plan = plan
+    total_scope = 2**N #full search
+    delta_mark = total_scope / 10
+    full_plan = range(N) #search every neighbors
     probes = []
+    probes_append = probes.append
+    tick = 0
+    # search
     for current_id in xrange(total_scope):
+        # data
         probe = Probe()
         probe.location_id = current_id
         probe.performance = landscape.get_score_of_location_by_id(probe.location_id)
-        probes.append(probe)
+        probes_append(probe)
+        # display
+        if not quietly:
+            import sys
+            if current_id % delta_mark == 0:
+                sys.stdout.write("\r[%03d] completed %s>" % (tick*10,"="*tick))
+                tick += 1
+        # processing...
         while 1:
             neighbors = landscape.who_are_neighbors(probe.location_id,full_plan,1,True)
-            scores = []
             max_score = -1
             max_id = -1
+            # find max
             for n in neighbors:
                 nei_score = landscape.get_score_of_location_by_id(n)
-                if nei_score > max_score:
+                if nei_score > max_score: # higher
                     max_id = n
                     max_score = nei_score
-                elif nei_score == max_score and n > max_id:
-                    max_id = n
-            if max_score > probe.performance:
-                probe.location_id = max_id
+                elif nei_score == max_score and n > max_id: # equal but better ID
+                    max_id = n # new location
+            # assessment
+            if max_score > probe.performance: # higher
+                probe.location_id = max_id # update
                 probe.performance = max_score
                 probe.moved = True
-            elif max_score == probe.performance:
-                if max_id > probe.location_id:
-                    probe.location_id = max_id
+                # go next
+            elif max_score == probe.performance: # equal but
+                if max_id > probe.location_id: # better?
+                    probe.location_id = max_id # move
                     probe.moved = True
+                    # go next (if the probe is up on the hilltop, go to the maximum ID location for settlement)
                 else:
-                    break
-            elif max_score < probe.performance and probe.moved == False:
-                probe.moved = True
-                break
+                    break # I am the king. Stop.
+            elif max_score < probe.performance and probe.moved == False: # Originally, the probe in a local peak
+                probe.moved = True # set this is good to go
+                break # stop
             else:
-                break
+                break # stop
+    if not quietly:
+        sys.stdout.write("\r[%03d] completed %s>" % (100,"="*10))
+        sys.stdout.write("\nLocal peak searching completed.\n")
+    # sum up
     all_peak = []
     for probe in probes:
         if probe.moved:

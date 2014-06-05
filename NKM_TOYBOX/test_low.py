@@ -36,7 +36,7 @@ def testing(input_a,plan,itern=10):
         land1 = Landscape(fitness_contribution_matrix = fit1)
         land1.compute_all_locations_id(plan)
         land1.standardize()
-        sum+= count_local_peak(land1) 
+        sum+= count_local_peak(land1,False) 
     return sum / float(itern)
     
 kset = [k0,k1,k2,k3,k4,k5,k6,k7,k8,k9]
@@ -44,4 +44,4 @@ planset = [plan0,plan3,plan5,plan7,plan9]
 
 for iks, ks in enumerate(kset):
     for ips,ps in enumerate(planset):
-        print "ks=%d, ps=%d, peak=%f" % (iks,ips,testing(ks,ps))
+        print "ks=%d, ps=%d, peak=%f" % (iks,ips,testing(ks,ps,1))
