@@ -56,6 +56,10 @@
 <li><a class="reference internal" href="#modeling-the-modularity-structure">Modeling the Modularity Structure</a></li>
 <li><a class="reference internal" href="#team-up-organizational-structure">Team Up (Organizational Structure)</a></li>
 <li><a class="reference internal" href="#modeling-heterogeneity-of-incentives-and-rewards">Modeling Heterogeneity of Incentives and Rewards</a></li>
+<li><a class="reference internal" href="#modeling-information-processing-power">Modeling Information Processing Power</a></li>
+<li><a class="reference internal" href="#modeling-the-re-process-as-task-partitions">Modeling the RE Process as Task Partitions</a></li>
+<li><a class="reference internal" href="#modeling-additional-features-of-the-re-problem-via-combination">Modeling Additional Features of the RE Problem via Combination</a></li>
+<li><a class="reference internal" href="#modeling-the-economic-implications-of-the-re-problem">Modeling the Economic Implications of the RE Problem</a></li>
 </ul>
 </li>
 </ul>
@@ -456,6 +460,49 @@
 <span class="go">        part_idx = agent_clan.part_idx)</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="modeling-information-processing-power">
+<h2>Modeling Information Processing Power<a class="headerlink" href="#modeling-information-processing-power" title="Permalink to this headline">¶</a></h2>
+<p>In the ordinary NK Landscape simulation, we assume that an agent looks around neighbors who are different in terms of only one configuration element of the influence matrix. But, this assumption is not always true. For example, people use secondary sources to enrich knowledge even though they have not experienced directly. Information technologies have fortified information processing power; thus reducing actual cost of obtaining knowledge sources for decision making. If that is right, the assumption of limited and direct local search is required to be lessened.</p>
+<p>Let&#8217;s go back to the modeling of a requirement engineering team. At this time, we will consider greater information processing power for searching the landscape (i.e., long jump). RE teams with greater information processing power may consider a broader range of design alternatives. Typically, RE teams are modeled as conducting local search (i.e., only being able to consider alternative one-off configurations in the immediate neighborhood of the current configuration) rather than considering distant configuration that differ from the status quo on multiple decision variables.</p>
+<p>However, RE teams may consider more distant design configurations if endowed with greater processing power. The can be modeled using a parameter alternatives, which represents the number of alternative design configurations that the RE team considers in each iteration. The RE teams will consider alternatives starting with more proximal ones then moving onto more distant ones.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">market_evaluation_by_biz_professional</span> <span class="o">=</span> <span class="n">LandscapeAdaptive</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fitness_of_real_demand</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">market_evaluation_by_is_professional</span> <span class="o">=</span> <span class="n">LandscapeAdaptive</span><span class="p">(</span><span class="n">fitness_contribution_matrix</span> <span class="o">=</span> <span class="n">fitness_of_real_demand</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processing_power</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">re_team</span> <span class="o">=</span> <span class="n">ReTeamClan</span><span class="p">(</span>
+<span class="go">            market_evaluation_by_biz_professional,</span>
+<span class="go">            market_evaluation_by_is_professional,</span>
+<span class="go">            processing_power,</span>
+<span class="go">            RequirementEngineeringTeam,</span>
+<span class="go">            100)</span>
+</pre></div>
+</div>
+<p>For example, if <span class="math">\(N=16\)</span> and alternatives = 20, the RE teams will first consider 16 one-off configurations in the immediate neighborhood of the current configuration and 4 configurations that differ on 2 decision variables (chosen at random from the possible <span class="math">\(_{16}C_{2}=120\)</span> choices). This extension ought to enable design teams to move on the landscape in a fashion that enables them to escape local minima and thus be more likely to discover global performance maxima.</p>
+</div>
+<div class="section" id="modeling-the-re-process-as-task-partitions">
+<h2>Modeling the RE Process as Task Partitions<a class="headerlink" href="#modeling-the-re-process-as-task-partitions" title="Permalink to this headline">¶</a></h2>
+<p>Searching a landscape for discovering the best fitness value is a greate journey. Basically, we assume that an agent has iron spirit enough to consider every alternatives at once. Sometimes, this is perceived to be too strong to describe a real world phenomenon. Let&#8217;s think about system development processes as an example.</p>
+<p>The software development process encapsulates the prescriptions of the systems development methodology that is applied. It should be noted that various software development approaches can be conceptualized at a fundamental level as different ways to partition and structure the system development tasks of analysis, design, implementation and so on. A parsimonious way to characterize task partitioning is by specifying the scope of systems design activities for each incremental iteration.</p>
+<p>For instance, SDLC/waterfall processes can be characterized as considering the full scope of N configuration choices in one iteration, whereas agile processes can be modeled as successively considering subsets of N configuration choices over several iterations. To simulate this, we need to define length of partition.</p>
+<p><strong>Length of Partition</strong>. When the total length of simulation time is given by <span class="math">\(T\)</span>, the <span class="math">\(k_ij\)</span> time stamp at <span class="math">\(i_{th}\)</span> patition has <span class="math">\(j\)</span> as an indicator, such that <span class="math">\(j \in \mathtt{J}={1,2,\cdots,p}\)</span> and <span class="math">\(i \in \mathtt{I}={1,2,\cdots,q}\)</span>. Also, <span class="math">\(T=p \times q\)</span>. Length of partition is referes to count of <span class="math">\(\mathtt{J}\)</span>.</p>
+<div class="figure align-center">
+<img alt="_images/waterfall.png" src="_images/waterfall.png" />
+<p class="caption">Example: Task Partition in the Waterfall Methodology</p>
+</div>
+<div class="figure align-center">
+<img alt="_images/agile.png" src="_images/agile.png" />
+<p class="caption">Example: Task Partition in the Agile Methodology</p>
+</div>
+</div>
+<div class="section" id="modeling-additional-features-of-the-re-problem-via-combination">
+<h2>Modeling Additional Features of the RE Problem via Combination<a class="headerlink" href="#modeling-additional-features-of-the-re-problem-via-combination" title="Permalink to this headline">¶</a></h2>
+<p><strong>(TODO)</strong></p>
+<p>Each of these extensions models particular aspects of the RE problem and, in combination, they can capture others. For example, since smaller iterations result in more frequent deliveries of prototypes to customers this implies greater feedback, which can be modeled by decreasing the extent of uncertainty at the end of each iteration. Similarly, varying iteration length (RE process) and interdependency (complexity) can combine, such that a team undertaking iterations that match the modular structure ought to be able to find configurations that provide high performance by taking these interdependencies into account within each iteration.</p>
+</div>
+<div class="section" id="modeling-the-economic-implications-of-the-re-problem">
+<h2>Modeling the Economic Implications of the RE Problem<a class="headerlink" href="#modeling-the-economic-implications-of-the-re-problem" title="Permalink to this headline">¶</a></h2>
+<p><strong>(TODO)</strong></p>
+<p>Above we highlight that RE has implications in business contexts for both costs and revenue. Cost can be modeled by observing that design decisions and their implementation take time, and developers are paid for their time. In this way one can draw on the number of decisions taken as teams navigate across the landscape to represent cost, such that simulation conditions that achieve high performance more quickly that other conditions are considered to cost the firms that employ them less. In a competitive market revenue is impacted not only by overall performance, but by performance relative to other market players. This can be modeled by making the performance outcomes of particular design choices dependent on the performance outcomes of design choices made by other agents. To put this another way, the performance outcomes of other agents can be a source of selective dynamism in the landscape, such that as more successful agents perform the overall performance available to other agents is reduced.</p>
 </div>
 </div>
 
