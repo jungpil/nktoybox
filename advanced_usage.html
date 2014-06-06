@@ -55,6 +55,7 @@
 <li><a class="reference internal" href="#modeling-dynamism">Modeling Dynamism</a></li>
 <li><a class="reference internal" href="#modeling-the-modularity-structure">Modeling the Modularity Structure</a></li>
 <li><a class="reference internal" href="#team-up-organizational-structure">Team Up (Organizational Structure)</a></li>
+<li><a class="reference internal" href="#modeling-heterogeneity-of-incentives-and-rewards">Modeling Heterogeneity of Incentives and Rewards</a></li>
 </ul>
 </li>
 </ul>
@@ -405,6 +406,56 @@
                 <span class="k">break</span>
 </pre></div>
 </td></tr></table></div>
+</div>
+<div class="section" id="modeling-heterogeneity-of-incentives-and-rewards">
+<h2>Modeling Heterogeneity of Incentives and Rewards<a class="headerlink" href="#modeling-heterogeneity-of-incentives-and-rewards" title="Permalink to this headline">¶</a></h2>
+<p>The partitioning of the design problem into heterogenous departments brings to the foreground issues of incentives and how it may impact the search process. Departmental incentives relate to the extent to which each department considers the performance of the other department when assessing design alternatives. So, rather than thinking the unweighted average of the fitness contributions, each department will discount the fitness contributions of the other department&#8217;s design choices.</p>
+<div class="math">
+\[\begin{split}&amp; F^{'}_{business}(d) = \left( \sum_{i=1}^{m} c_{i} + incent \times \sum_{i=m+1}^{N} c_{i} \right) / N \\
+&amp; F^{'}_{IS}(d) = \left( incent \times \sum_{i=1}^{m} c_{i} + \sum_{i=m+1}^{N} c_{i} \right) / N \\\end{split}\]</div>
+<p>where <em>incent</em> is a parameter between 0 and 1 that represents the degree to which each department cares about the ramifications of tis design choices on the other department.</p>
+<p><strong>Example</strong>. If <span class="math">\(incent=1\)</span>, each department is equally concerned with the effects on the other department and is rewarded for overall performance (i.e., the disparate departments are trying to maximize overall value), whereas when <span class="math">\(incent \to 0\)</span>, each department seeks to prefers design alternatives that maximize its own local value, potentially at the expense of the other department.</p>
+<p>Modeling heterogeneity of incentives is related to the way of implementing an uncertainty structure in the NK model. You need to design a function to yield different effects from different cases. Let&#8217;s assume that two deparments are working in the same organization; namely, they are in the same team (see also, Team Up). In the previous case, we assume randomness; however, modeling heterogeneity is rather deterministic (meanwhile, incentive is fixed).</p>
+<p>You can use algorithm.incentive_structure() or create your own algorithm. Let&#8217;s examine &#8220;incentive_structure()&#8221; in detail.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">def</span> <span class="nf">incentive_structure</span><span class="p">(</span><span class="n">incentive_base</span><span class="p">,</span> <span class="n">c_i</span><span class="p">,</span> <span class="n">which_a</span><span class="p">,</span> <span class="n">which_b</span><span class="p">,</span> <span class="n">part_idx</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">which_a</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">which_b</span><span class="p">))</span>
+    <span class="c"># which_a and which_b are lists containing decision elements</span>
+    <span class="c"># for example, which_a = [0,1,2], which_b = [3,4,5] where N = 6</span>
+    <span class="k">assert</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;No incentive at all&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">NP</span>
+    <span class="c">#</span>
+    <span class="n">sum_of_a</span> <span class="o">=</span> <span class="n">c_i</span><span class="p">[</span><span class="n">which_a</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">sum_of_b</span> <span class="o">=</span> <span class="n">c_i</span><span class="p">[</span><span class="n">which_b</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">part_idx</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># for business</span>
+        <span class="n">F_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">sum_of_a</span> <span class="o">+</span> <span class="n">incentive_base</span> <span class="o">*</span> <span class="n">sum_of_b</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># for IS</span>
+        <span class="n">F_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">incentive_base</span> <span class="o">*</span> <span class="n">sum_of_a</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="k">return</span> <span class="n">F_d</span>
+</pre></div>
+</td></tr></table></div>
+<p>As we can notice, when different agent has initiative, different and distorted performance value can be obtained. You can use the <em>get_noised_score_of_location_id()</em> function in the <em>LandscapeAdaptive</em> class for describing this.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">agent</span><span class="o">.</span><span class="n">performance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_clan</span><span class="o">.</span><span class="n">landscape</span><span class="o">.</span><span class="n">get_noised_score_of_location_by_id</span> <span class="p">(</span>
+<span class="go">        agent.my_id, # current location of the agent</span>
+<span class="go">        func = incentive_structure, # uncertainty implementation</span>
+<span class="go">        incentive_base = self.agent_clan.incentive_base, # AgentClan defines environmental parameters</span>
+<span class="go">        which_a = self.agent_clan.incentive_structure_for_business_department,</span>
+<span class="go">        which_b = self.agent_clan.incentive_structure_for_is_department,</span>
+<span class="go">        part_idx = agent_clan.part_idx)</span>
+</pre></div>
+</div>
 </div>
 </div>
 

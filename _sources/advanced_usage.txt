@@ -133,7 +133,7 @@ The result is:
     0.648755475652
     0.72609681573
 
-Now, let's give shake it!
+Now, let's shake it!
 
 ..  code-block:: python
     :linenos:
@@ -257,12 +257,12 @@ With this setup, the business domain users are responsible for the business deci
     >>> knowledge_D = [[0,1,2,3],[3,4,5,6,7,8,9]] # common knowledge (4th element) and distinctive knowledge (others)
     >>> re_team.set_iteration_plan(search_plan) # searching behavior (in this case, how to work in working places)
     
-Let's say the first part is about business domain and the second part is about IS domain. In addition, we assume that business professionals work first and then the IS professionals take over. If The business professional finds better a design configuration, IS professionals must look into it. In this example, we assume that the first, second and third configuration elements are related to business domain knowledge; otherwise, about IS domain knowledge. In some cases, there is a common knowledge pool necessary for both parties. What if a big button for 'searching' is presented in a toolbox? What if a colorful animation is shown during idle time? Technically, the answers to those decision choices are beneficial in understanding productivity of the application. At the same time, those can be associated marketing as product differentiation.
+Let's say the first part is about business domain and the second part is about IS domain. In addition, we assume that business professionals work first and then the IS professionals take over. If The business professional finds a better design configuration, IS professionals must look into it. In this example, we assume that the first, second and third configuration elements are related to business domain knowledge; otherwise, about IS domain knowledge. In some cases, there is a common knowledge pool necessary for both parties. What if a big button for 'searching' is presented in a toolbox? What if a colorful animation is shown during idle time? Technically, the answers to those decision choices are beneficial in understanding productivity of the application. At the same time, those can be associated marketing as product differentiation.
 
     >>> market_evaluation_by_biz_professional.compute_all_locations_id(fix_plan = knowledge_D[0])
     >>> market_evaluation_by_is_professional.compute_all_locations_id(fix_plan = knowledge_D[1])
     
-To simulate team behavior, you need to create an implementation class based on landscape.AdapterPlan. As a part of coding, examine the following code:
+To simulate team behavior, you need to create an implementation class based on landscape.AdapterPlan. As a part of coding, examine the following:
 
 ..  code-block:: python
     :linenos:
@@ -306,4 +306,51 @@ To simulate team behavior, you need to create an implementation class based on l
                 if break_marker == True:
                     break
     
+Modeling Heterogeneity of Incentives and Rewards
+----------------------------------------------------------------
+
+The partitioning of the design problem into heterogenous departments brings to the foreground issues of incentives and how it may impact the search process. Departmental incentives relate to the extent to which each department considers the performance of the other department when assessing design alternatives. So, rather than thinking the unweighted average of the fitness contributions, each department will discount the fitness contributions of the other department's design choices.
+
+..  math::
+
+    & F^{'}_{business}(d) = \left( \sum_{i=1}^{m} c_{i} + incent \times \sum_{i=m+1}^{N} c_{i} \right) / N \\
+    & F^{'}_{IS}(d) = \left( incent \times \sum_{i=1}^{m} c_{i} + \sum_{i=m+1}^{N} c_{i} \right) / N \\
     
+    
+where *incent* is a parameter between 0 and 1 that represents the degree to which each department cares about the ramifications of tis design choices on the other department.
+
+**Example**. If :math:`incent=1`, each department is equally concerned with the effects on the other department and is rewarded for overall performance (i.e., the disparate departments are trying to maximize overall value), whereas when :math:`incent \to 0`, each department seeks to prefers design alternatives that maximize its own local value, potentially at the expense of the other department.
+
+Modeling heterogeneity of incentives is related to the way of implementing an uncertainty structure in the NK model. You need to design a function to yield different effects from different cases. Let's assume that two deparments are working in the same organization; namely, they are in the same team (see also, Team Up). In the previous case, we assume randomness; however, modeling heterogeneity is rather deterministic (meanwhile, incentive is fixed). 
+
+You can use algorithm.incentive_structure() or create your own algorithm. Let's examine "incentive_structure()" in detail.
+
+..  code-block:: python
+    :linenos:
+    
+    def incentive_structure(incentive_base, c_i, which_a, which_b, part_idx):
+        N = float(len(which_a) + len(which_b)) 
+        # which_a and which_b are lists containing decision elements
+        # for example, which_a = [0,1,2], which_b = [3,4,5] where N = 6
+        assert N > 0, "No incentive at all"
+        import numpy as NP
+        # 
+        sum_of_a = c_i[which_a].sum()
+        sum_of_b = c_i[which_b].sum()
+        if part_idx < 1: # for business
+            F_d = (sum_of_a + incentive_base * sum_of_b) / N
+        else: # for IS
+            F_d = (incentive_base * sum_of_a) / N
+        return F_d
+
+        
+As we can notice, when different agent has initiative, different and distorted performance value can be obtained. You can use the *get_noised_score_of_location_id()* function in the *LandscapeAdaptive* class for describing this.
+
+>>> agent.performance = self.agent_clan.landscape.get_noised_score_of_location_by_id (
+        agent.my_id, # current location of the agent
+        func = incentive_structure, # uncertainty implementation
+        incentive_base = self.agent_clan.incentive_base, # AgentClan defines environmental parameters
+        which_a = self.agent_clan.incentive_structure_for_business_department,
+        which_b = self.agent_clan.incentive_structure_for_is_department,
+        part_idx = agent_clan.part_idx)
+        
