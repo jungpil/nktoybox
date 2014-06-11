@@ -57,7 +57,7 @@ class AdapterBehaviorAgileTeam(AdapterBehavior):
                     # fail
                     current_score = new_score_true
                     agent.my_id = neighbor_id_int
-                    agent.visited_ids[agent.my_id]
+                    agent.visited_ids[agent.my_id] = 'v'
                     agent.true_performance = current_score
                     agent.expected_performance = current_score
                     new_id = agent.my_id
