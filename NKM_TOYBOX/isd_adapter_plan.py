@@ -34,11 +34,11 @@ class AdapterPlanISD(AdapterPlan):
         ct = 0 #current time
         #### INITIALIZATION ####
         agent.expected_performance = self.agent_clan.landscape.get_noised_score_of_location_by_id(
-                                                                                                                                    agent.my_id,
-                                                                                                                                    func = linear_uncertainty,
-                                                                                                                                    uncertainty_base = self.uncertainty_base,
-                                                                                                                                    tick = ct,
-                                                                                                                                    total_tick = agent.tick_end)
+                                    agent.my_id,
+                                    func = linear_uncertainty,
+                                    uncertainty_base = self.uncertainty_base,
+                                    tick = ct,
+                                    total_tick = agent.tick_end)
         # expected performance := true fitness value +- error (i.e., uncertainty ~ uniform(given range))
         # When a project starts, nobody knows feedback from customers. The team may rely on market research data.
         agent.true_performance = self.agent_clan.landscape.get_score_of_location_by_id(agent.my_id)
@@ -54,13 +54,9 @@ class AdapterPlanISD(AdapterPlan):
         #### SEARCHING ####
         while 1:
             for plan in agent.plans: #per each plan
-                #TODO - adjust as N size varies
-                self.agent_clan.landscape.compute_all_locations_id(fix_plan = self.fix_plan)
                 agent.ct = ct # let him know the current tick(=time)
                 (agent.my_id, agent.true_performance) = current_behavior.execute(agent, plan) #update
                 agent.performance = agent.true_performance
-                # Let the agent work a planned task at a given time (linearly or cyclically)
-                # agent update the current location and performance as a result
                 ct += 1 # increase time
                 self.simulator.write_record(agent) # write a record after work
                 if ct >= self.tick_end: # if ticks are over the target number,

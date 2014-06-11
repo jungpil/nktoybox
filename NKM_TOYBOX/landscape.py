@@ -422,7 +422,7 @@ class LandscapeAdaptive(Landscape):
         self.fitness_correction_item = {} #c_i for algorithm
         self.fix_plan = None
         self.standardized_fitness_value_dict = None
-    def compute_all_locations_id(self, fix_plan=None):
+    def compute_all_locations_id(self, fix_plan=None, calculate_now = False):
         """
 |  Brutely compute all before we do something
         """
@@ -432,8 +432,10 @@ class LandscapeAdaptive(Landscape):
         self.locations_list = []
         add_locs = self.locations_list.append
         self.fix_plan = fix_plan
-        for i in xrange(map_size):
-            add_locs(self.location_id_to_location(i))
+        for location_id in xrange(map_size):
+            add_locs(self.location_id_to_location(location_id))
+            if calculate_now:
+                self.fitness_value_dict[location_id],self.fitness_correction_item[location_id] = self.compute_score_for_location_id(location_id,fix_plan=self.fix_plan,reduced=False)
     def shocked(self,shock_func,**kargs):
         """
 Dynamism represents the notion that requirements may change over time, which can
