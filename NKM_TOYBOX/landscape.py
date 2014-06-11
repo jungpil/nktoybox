@@ -161,8 +161,10 @@ class FitnessContributionTable:
 |  "its 2 dependent elements are 0,1 respectively".
 
     """
-    def __init__(self,influence_matrix):
+    def __init__(self,influence_matrix,random_seed=0):
         # CONSTRUCTOR
+        self.random_seed = random_seed
+        RandomGenerator.set_seed(random_seed)
         self.influence_matrix = influence_matrix
         self.dim_1 = self.influence_matrix.my_N
         self.dim_2 = 2

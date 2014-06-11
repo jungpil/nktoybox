@@ -42,6 +42,7 @@ class AgileDeveloperClan(AgentClan):
     def __init__(self,landscape, processing_power, agent_class, population=1):
         AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
         self.uncertainty_base = 0.0
+        self.modularity_degree = ''
     def hatch_members(self):
         """
 |  A clan is just a container. We need agents first. Make them.
@@ -63,6 +64,14 @@ class AgileDeveloperClan(AgentClan):
             add_member(agent)
             # assign the agent as a clan member
         self.number_of_not_finished = self.total_num #for later use
+    def __str__(self):
+        rv = "Plan: %s\nProcessing Power: %d\nN: %d\nK: %d\nUncertainty: %f\nModularity: %s\n" % (self.iteration_plan,
+                self.myProcessingPower,
+                self.landscape.get_influence_matrix_N(),
+                self.landscape.get_influence_matrix_K(),
+                self.uncertainty_base,
+                self.modularity_degree,)
+        return rv
 class WaterfallDeveloperClan(AgentClan):
     """
 |  A clan is an abstract container that defines common attributes of agents
@@ -71,6 +80,7 @@ class WaterfallDeveloperClan(AgentClan):
     def __init__(self,landscape, processing_power, agent_class, population=1, feedback_tick = 5):
         AgentClan.__init__(self,landscape=landscape, processing_power=processing_power, agent_class=agent_class, population=population)
         self.uncertainty_base = 0.0
+        self.modularity_degree = ''
         self.feedback_tick = feedback_tick # get feedback on every fifth tick
     def hatch_members(self):
         """
@@ -90,10 +100,11 @@ class WaterfallDeveloperClan(AgentClan):
             add_member(agent)
         self.number_of_not_finished = self.total_num
     def __str__(self):
-        rv = "Plan: %s\nProcessing Power: %d\nN: %d\nK: %d\nFeedback Tick: %d\n" % (self.iteration_plan,
-                                                                                            self.myProcessingPower,
-                                                                                            self.landscape.get_influence_matrix_N(),
-                                                                                            self.landscape.get_influence_matrix_K(),
-                                                                                            self.feedback_tick,)
+        rv = "Plan: %s\nProcessing Power: %d\nN: %d\nK: %d\nUncertainty: %f\nModularity: %s\n" % (self.iteration_plan,
+                self.myProcessingPower,
+                self.landscape.get_influence_matrix_N(),
+                self.landscape.get_influence_matrix_K(),
+                self.uncertainty_base,
+                self.modularity_degree,)
         return rv
 # END OF PROGRAM #

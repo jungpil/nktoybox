@@ -10,6 +10,8 @@ Jungpil and Taekyung
 '''
 import numpy as np
 import csv, time, gzip
+import RandomGenerator
+
 class SimRecord:
     def __init__(self, my_id, plan, ct, performance):
         self.location_id = my_id
@@ -64,10 +66,14 @@ class Simulator:
         time_stamp = time.ctime()
         file_name_profile = "%s_profile.txt" % file_name
         f_profile = open(file_name_profile,'wb')
-        f_profile.write(time_stamp)
-        f_profile.write(plan_profile)
-        f_profile.write(clan_profile)
-        f_profile.write(behavior_profile)
+        f_profile.write("=========================================\n")
+        f_profile.write("NK Landscape Simuation\n")
+        f_profile.write("=========================================\n")
+        f_profile.write("\nRandom seed:%d\n"%RandomGenerator.get_current_seed())
+        f_profile.write("\n%s\n"%time_stamp)
+        f_profile.write("\n%s\n"%plan_profile)
+        f_profile.write("\n%s\n"%clan_profile)
+        f_profile.write("\n%s\n"%behavior_profile)
         f_profile.close()
 class AdapterPlan:
     def __init__(self, simulator, adapter_behavior, agent_clan, agent, tick_end):
